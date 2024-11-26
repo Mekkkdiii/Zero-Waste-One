@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../../node_modules/chart.js/auto/auto.mjs"],
+  "sourcesContent": ["import { Chart, registerables } from '../dist/chart.mjs';\nChart.register(...registerables);\nexport default Chart;"],
+  "mappings": ";;;;;;;AACA,MAAM,SAAS,GAAG,aAAa;AAC/B,IAAO,eAAQ;",
+  "names": []
+}
