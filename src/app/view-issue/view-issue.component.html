@@ -1,0 +1,24 @@
+<div class="issues-container">
+  <h2>View and Manage Issues</h2>
+  
+  <ul *ngIf="issues.length > 0" class="issues-list">
+    <li *ngFor="let issue of issues" class="issue-item">
+      <div class="issue-details">
+        <strong class="issue-type">{{ issue.type }}</strong> - 
+        <span class="issue-location">{{ issue.location }}</span>
+        <p class="issue-description">{{ issue.description }}</p>
+      </div>
+
+      <div class="issue-status">
+        <label for="status">Status:</label>
+        <select [(ngModel)]="issue.status">
+          <option value="NEW">NEW</option>
+          <option value="IN PROGRESS">IN PROGRESS</option>
+          <option value="RESOLVED">RESOLVED</option>
+        </select>
+      </div>
+    </li>
+  </ul>
+  
+  <p *ngIf="issues.length === 0">No issues reported.</p>
+</div>

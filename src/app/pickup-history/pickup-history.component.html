@@ -1,0 +1,53 @@
+<div class="pickup-history-container">
+  <h2>Pickup History</h2>
+
+  <!-- Filter options -->
+  <div class="filters">
+    <div class="date-range">
+      <label for="startDate">Start Date:</label>
+      <input type="date" id="startDate" [(ngModel)]="startDate" aria-label="Start Date">
+      
+      <label for="endDate">End Date:</label>
+      <input type="date" id="endDate" [(ngModel)]="endDate" aria-label="End Date">
+    </div>
+
+    <label for="wasteType">Waste Type:</label>
+    <select id="wasteType" [(ngModel)]="selectedWasteType" aria-label="Waste Type">
+      <option value="">All Types</option>
+      <option *ngFor="let type of wasteTypes" [value]="type">{{ type }}</option>
+    </select>
+
+    <button (click)="applyFilters()" aria-label="Apply Filters">Apply Filters</button>
+  </div>
+
+  <!-- No filters applied message -->
+  <div *ngIf="filtersApplied && !isFilterApplied()" class="no-filters-message">
+    No filters applied.
+  </div>
+
+  <!-- Pickup history list -->
+  <div *ngIf="filteredHistory.length > 0" class="history-list">
+    <table>
+      <thead>
+        <tr>
+          <th (click)="sortBy('date')">Date</th>
+          <th (click)="sortBy('type')">Waste Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let record of filteredHistory">
+          <td>{{ record.date | date: 'shortDate' }}</td>
+          <td>{{ record.type }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Chart for waste types -->
+    <canvas id="wasteTypeChart"></canvas>
+  </div>
+
+  <!-- No history message -->
+  <div *ngIf="filteredHistory.length === 0 && isFilterApplied()" class="no-history-message">
+    No pickup history available.
+  </div>
+</div>

@@ -1,0 +1,29 @@
+.dashboard-container {
+    max-width: 800px; /* Maximum width of the container */
+    margin: 20px auto; /* Centering the container */
+    padding: 20px; /* Padding around the container */
+    background-color: #f9f9f9; /* Light background color */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  }
+  
+  .dashboard-title {
+    text-align: center; /* Center the title */
+    color: #642d0f; /* Dark color for the title */
+    margin-bottom: 20px; /* Spacing below the title */
+  }
+  
+  .community-info-card {
+    background-color: #fff; /* White background for the card */
+    padding: 15px; /* Padding inside the card */
+    border-radius: 6px; /* Rounded corners for the card */
+    border: 1px solid #ddd; /* Light border around the card */
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  }
+  
+  .no-community {
+    text-align: center; /* Center text for no community message */
+    color: #888; /* Lighter color for the message */
+    margin-top: 20px; /* Spacing above the message */
+  }
+  

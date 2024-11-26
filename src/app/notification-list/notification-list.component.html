@@ -1,0 +1,35 @@
+<div class="notification-list">
+  <div class="notification-list">
+    <h2>Notifications</h2>
+    
+    <div class="notification-settings">
+      <label>
+        <input type="checkbox" [(ngModel)]="notificationsEnabled" (change)="toggleNotifications()" />
+        Enable Notifications
+      </label>
+    </div>
+  
+    <div *ngIf="!notificationsEnabled" class="no-notifications">
+      <p>Notifications are disabled.</p>
+    </div>
+    
+    <div *ngIf="notificationsEnabled">
+      <ul *ngIf="notifications.length > 0" class="notification-box">
+        <li *ngFor="let notification of notifications" [ngClass]="{'read': notification.read}" class="notification-item">
+          <p class="notification-message">{{ notification.message }}</p>
+          <p class="notification-date">{{ notification.date | date: 'short' }}</p>
+          <div class="notification-actions">
+            <button (click)="markAsRead(notification)">Mark as Read</button>
+            <button (click)="deleteNotification(notification)" class="delete-button">Delete</button>
+          </div>
+        </li>
+      </ul>
+      <p *ngIf="notifications.length === 0" class="no-notifications">No notifications available.</p>
+    </div>
+  </div>
+  
+
+
+
+
+  

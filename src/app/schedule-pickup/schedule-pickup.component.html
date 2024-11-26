@@ -1,0 +1,30 @@
+<div class="schedule-pickup">
+  <h2>Schedule Waste Pickup</h2>
+  
+  <form (ngSubmit)="onSubmit()" #pickupForm="ngForm">
+    <div class="form-group">
+      <label for="date">Preferred Day (Next available date: {{ nextAvailableDate }})</label>
+      <select id="date" name="date" [(ngModel)]="selectedDate" required>
+        <option *ngFor="let date of availableDates" [value]="date">{{ date | date: 'fullDate' }}</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="time">Preferred Time</label>
+      <select id="time" name="time" [(ngModel)]="selectedTime" required>
+        <option *ngFor="let time of availableTimes" [value]="time">{{ time }}</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="wasteType">Type of Waste</label>
+      <select id="wasteType" name="wasteType" [(ngModel)]="selectedWasteType" required>
+        <option *ngFor="let waste of wasteTypes" [value]="waste">{{ waste }}</option>
+      </select>
+    </div>
+
+    <button type="submit" [disabled]="!pickupForm.valid">Schedule Pickup</button>
+
+    <div *ngIf="confirmationMessage" class="confirmation">{{ confirmationMessage }}</div>
+  </form>
+</div>

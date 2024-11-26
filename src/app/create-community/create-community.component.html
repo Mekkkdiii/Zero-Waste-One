@@ -1,0 +1,52 @@
+<div class="create-community-container">
+    <h2>Create New Community</h2>
+    
+    <form (ngSubmit)="onSubmit()" #createCommunityForm="ngForm">
+      
+      <!-- Community Name -->
+      <div class="form-group">
+        <label for="communityName">Community Name</label>
+        <input type="text" id="communityName" name="communityName" [(ngModel)]="communityName" required>
+      </div>
+      
+      <!-- Community Address -->
+      <div class="form-group">
+        <label for="communityAddress">Address</label>
+        <input type="text" id="communityAddress" name="communityAddress" [(ngModel)]="communityAddress" required>
+      </div>
+      
+      <!-- Schedule Waste Pickup Days -->
+      <div class="form-group">
+        <label>Pickup Days</label>
+        <div class="checkbox-group">
+          <div *ngFor="let day of availableDays">
+            <label>{{ day }}</label>
+            <input type="checkbox" [value]="day" (change)="onDayChange($event, day)">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Schedule Waste Pickup Time -->
+      <div class="form-group">
+        <label for="pickupStartTime">Pickup Start Time</label>
+        <input type="time" id="pickupStartTime" name="pickupStartTime" [(ngModel)]="pickupStartTime" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="pickupEndTime">Pickup End Time</label>
+        <input type="time" id="pickupEndTime" name="pickupEndTime" [(ngModel)]="pickupEndTime" required>
+      </div>
+  
+      <!-- Submit Button -->
+      <button type="submit" [disabled]="!createCommunityForm.form.valid">Create Community</button>
+    </form>
+  
+    <!-- Success Message -->
+    <div *ngIf="successMessage" class="success-message">
+      {{ successMessage }}
+    </div>
+  </div>
+  
+  
+  
+    

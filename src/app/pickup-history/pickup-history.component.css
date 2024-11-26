@@ -1,0 +1,89 @@
+.pickup-history-container {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 30px auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: rgb(100, 49, 12);
+}
+
+.filters {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.date-range {
+  display: flex;
+  gap: 10px;
+  align-items: center; 
+  margin-bottom: 10px;
+}
+
+.date-range label {
+  padding-top: 5px; 
+  margin-right: 10px;
+  white-space: nowrap;
+}
+
+.filters label {
+  margin-right: 10px;
+  white-space: nowrap;
+}
+
+.filters input, .filters select, .filters button {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.filters select, .filters button {
+  margin-bottom: 10px;
+}
+
+.filters button {
+  background-color: #28a745;
+  color: white;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th, table td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+table th {
+  cursor: pointer;
+}
+
+.no-history-message, .no-filters-message {
+  text-align: center;
+  color: #777;
+  margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+  .filters {
+    align-items: stretch;
+  }
+
+  .date-range {
+    flex-direction: column;
+  }
+
+  .filters input, .filters select, .filters button {
+    width: 100%;
+  }
+}

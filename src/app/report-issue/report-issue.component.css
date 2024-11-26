@@ -1,0 +1,107 @@
+/* Container styles */
+.container {
+  max-width: 800px; /* Limit the width of the container */
+  margin: 20px auto; /* Center the container with margin */
+  padding: 20px; /* Add padding inside the container */
+  background-color: #f7f7f7; /* White background for the container */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* Heading styles */
+h2 {
+  margin-bottom: 20px;
+  text-align: center; 
+  color: rgb(100, 49, 12); /* Dark color for the heading */
+}
+
+h3 {
+  font-size: 20px; /* Size for subheadings */
+  margin-top: 20px; /* Space above subheadings */
+  margin-bottom: 10px; /* Space below subheadings */
+  color: #555; /* Slightly lighter color for subheadings */
+}
+
+/* Button styles */
+.new-issue-btn {
+  background-color: #e74c3c; /* Button background */
+  color: #fff; /* Button text color */
+  padding: 10px 15px; /* Button padding */
+  border: none; /* No border */
+  border-radius: 5px; /* Rounded corners for the button */
+  cursor: pointer; /* Pointer on hover */
+  margin-bottom: 20px; /* Space below the button */
+  transition: background-color 0.3s; /* Smooth background transition */
+}
+
+/* Button hover effect */
+.new-issue-btn:hover {
+  background-color: #c0392b; /* Darker shade on hover */
+}
+
+.submit-btn {
+  margin: 15px;
+  
+}
+
+/* Form styles */
+.issue-form {
+  border: 1px solid #ddd; /* Light border for the form */
+  border-radius: 8px; /* Rounded corners for the form */
+  padding: 20px; /* Padding inside the form */
+  margin-bottom: 20px; /* Space below the form */
+}
+
+/* Input and textarea styles */
+input[type="text"],
+textarea,
+select {
+  width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Submit button for the form */
+button[type="submit"] {
+  background-color: #3498db; /* Blue background */
+  color: #fff; /* White text */
+  padding: 10px 15px; /* Padding */
+  border: none; /* No border */
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer; /* Pointer on hover */
+}
+
+/* Submit button hover effect */
+button[type="submit"]:hover {
+  background-color: #2980b9; /* Darker blue on hover */
+}
+
+/* Issues list styles */
+.issues-list {
+  margin-top: 20px; /* Space above issues list */
+}
+
+/* Issues list item styles */
+.issues-list ul {
+  list-style: none; /* Remove bullet points */
+  padding: 0; /* Remove default padding */
+}
+
+.issues-list li {
+  padding: 10px; /* Padding for list items */
+  border: 1px solid #eeeeee; /* Light border for each issue */
+  border-radius: 5px; /* Rounded corners for list items */
+  margin-bottom: 10px; /* Space below list items */
+  background-color: #f9f9f9; /* Light background for list items */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); 
+}
+
+/* Strong text styles */
+strong {
+  color: #e74c3c; /* Color for strong text */
+}
+
+

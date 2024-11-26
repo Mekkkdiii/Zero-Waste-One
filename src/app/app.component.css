@@ -1,0 +1,28 @@
+/* General Styles */
+body, html {
+  margin: 0; 
+  padding: 0;
+  font-family: Arial, sans-serif;
+  height: 100%; 
+  background-color: #d2b48c; 
+  overflow-x: hidden; 
+}
+
+/* Ensure content takes full height */
+body {
+  min-height: 100vh; 
+  background-color: #d2b48c; 
+}
+
+/* Content Container */
+.content-container {
+  margin-top: 150px; 
+}
+
+/* Header Title */
+.header h1 {
+  color: white;
+  font-size: 2vw;
+  margin: 0;
+  white-space: nowrap;
+}

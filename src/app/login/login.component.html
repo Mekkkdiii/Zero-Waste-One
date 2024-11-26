@@ -1,0 +1,46 @@
+<div class="login-container">
+  <h1>ZeroWasteOne</h1>
+  <h2>Login</h2>
+
+  <form (ngSubmit)="login()">
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input
+        type="email"
+        id="email"
+        [(ngModel)]="email"
+        name="email"
+        required
+        placeholder="Enter your email"
+        aria-label="Email"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password:</label>
+      <input
+        type="password"
+        id="password"
+        [(ngModel)]="password"
+        name="password"
+        required
+        placeholder="Enter your password"
+        aria-label="Password"
+      />
+    </div>
+
+    <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+    <button type="submit">Login</button>
+
+    <div class="links">
+      <a (click)="forgotPassword()">Forgot Password?</a>
+    </div>
+
+    <div class="register-links">
+      <p>New here? Register now:</p>
+      <button type="button" (click)="navigateToRegister('admin')">Admin Register</button> <!-- Prevent form submission -->
+      <button type="button" (click)="navigateToRegister('community')">Community Register</button> <!-- Prevent form submission -->
+    </div>
+  </form>
+</div>

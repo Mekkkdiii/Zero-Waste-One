@@ -1,0 +1,17 @@
+<div class="dashboard-container">
+  <h1 class="dashboard-title">Admin Dashboard</h1>
+
+  <div class="community-info-card" *ngIf="communityExists">
+    <h2>Community Information</h2>
+    <p><strong>Community Name:</strong> {{ communityName }}</p>
+    <p><strong>Address:</strong> {{ communityAddress }}</p>
+    <p><strong>Pickup Days:</strong> {{ pickupDays.join(', ') }}</p>
+    <p>
+      <strong>Pickup Time:</strong> From {{ pickupStartTime }} to {{ pickupEndTime }}
+    </p>
+  </div>
+
+  <div *ngIf="!communityExists" class="no-community">
+    <p>No community assigned yet.</p>
+  </div>
+</div>

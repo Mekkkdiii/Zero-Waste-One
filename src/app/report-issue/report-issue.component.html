@@ -1,0 +1,44 @@
+<div class="container">
+  <h2>Report Issue</h2>
+
+  <button class="new-issue-btn" (click)="showNewIssueForm()">New Issue +</button>
+
+  <div *ngIf="newIssueFormVisible" class="issue-form">
+    <h3>Report a New Issue</h3>
+    <form (ngSubmit)="submitIssue()">
+      <label for="type">Issue Type:</label>
+      <select id="type" [(ngModel)]="newIssue.type" required name="type">
+        <option value="" disabled selected>Select an issue type</option>
+        <option value="Missed Pickup">Missed Pickup</option>
+        <option value="Overflowing Bin">Overflowing Bin</option>
+        <option value="Illegal Dumping">Illegal Dumping</option>
+      </select>
+
+      <label for="location">Location:</label>
+      <input type="text" id="location" [(ngModel)]="newIssue.location" required name="location" />
+
+      <label for="description">Description:</label>
+      <textarea id="description" [(ngModel)]="newIssue.description" required name="description"></textarea>
+
+      <label for="comments">Additional Comments (Optional):</label>
+      <textarea id="comments" [(ngModel)]="newIssue.comments" name="comments"></textarea>
+
+      <label for="photo">Upload Photo:</label>
+      <input type="file" id="photo" (change)="onPhotoUpload($event)" />
+      <div class="submit-btn">
+        <button type="submit">Submit Issue</button>
+      </div>
+      
+    </form>
+  </div>
+
+  <div *ngIf="reportedIssues.length > 0" class="issues-list">
+    <h3>Your Reported Issues</h3>
+    <ul>
+      <li *ngFor="let issue of reportedIssues">
+        <strong>{{ issue.type }}</strong> - {{ issue.location }} (Status: {{ issue.status }})
+        <p>{{ issue.description }}</p>
+      </li>
+    </ul>
+  </div>
+</div>

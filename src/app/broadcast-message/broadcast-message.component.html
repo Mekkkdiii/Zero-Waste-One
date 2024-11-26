@@ -1,0 +1,15 @@
+<div class="broadcast-message">
+    <h2>Broadcast Community Announcement</h2>
+    
+    <form (ngSubmit)="onSubmit()" #announcementForm="ngForm">
+      <div class="form-group">
+        <label for="message">Announcement Message:</label>
+        <textarea id="message" name="message" [(ngModel)]="announcementMessage" required></textarea>
+      </div>
+  
+      <button type="submit" [disabled]="!announcementForm.valid">Broadcast Announcement</button>
+  
+      <div *ngIf="confirmationMessage" class="confirmation">{{ confirmationMessage }}</div>
+    </form>
+  </div>
+  
