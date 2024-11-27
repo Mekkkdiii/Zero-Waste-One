@@ -1,11 +1,11 @@
 <div class="login-container">
   <h1>ZeroWasteOne</h1>
   <h2>Admin Registration</h2>
-  <form (ngSubmit)="onNext()">
+  <form (ngSubmit)="registerAdmin()">
     <input
       type="text"
-      placeholder="Admin Name"
-      [(ngModel)]="admin.name"
+      placeholder="Full Name"
+      [(ngModel)]="admin.fullName"
       name="name"
       required
     />

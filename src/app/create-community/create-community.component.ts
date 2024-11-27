@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-create-community',
@@ -13,10 +14,20 @@ export class CreateCommunityComponent {
   pickupStartTime: string = '';
   pickupEndTime: string = '';
   successMessage: string = '';
-
+  errorMessage: string = '';
   availableDays: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-  constructor(private router: Router) {}
+  // Admin ID from state or localStorage
+  adminId: string | null = null;
+
+  constructor(private router: Router, private http: HttpClient) {
+    const navigation = this.router.getCurrentNavigation();
+    if (navigation && navigation.extras.state) {
+      this.adminId = navigation.extras.state['adminId'];
+    } else {
+      this.adminId = localStorage.getItem('adminId'); // Fallback if not passed via navigation
+    }
+  }
 
   // Handle form submission
   onSubmit() {
@@ -25,24 +36,36 @@ export class CreateCommunityComponent {
       this.communityAddress &&
       this.pickupDays.length > 0 &&
       this.pickupStartTime &&
-      this.pickupEndTime
+      this.pickupEndTime &&
+      this.adminId
     ) {
-      // Simulate community creation
-      this.successMessage = `Successfully created the community "${this.communityName}" with pickup on ${this.pickupDays.join(', ')} from ${this.pickupStartTime} to ${this.pickupEndTime}.`;
-
-      // Prepare the community data to be sent to the Admin Dashboard
+      // Prepare the community data to be sent to the backend
       const communityData = {
         name: this.communityName,
         address: this.communityAddress,
-        days: this.pickupDays,
-        startTime: this.pickupStartTime,
-        endTime: this.pickupEndTime,
+        pickupDays: this.pickupDays,
+        pickupStartTime: this.pickupStartTime,
+        pickupEndTime: this.pickupEndTime,
+        adminId: this.adminId,
       };
 
-      // Display the success message briefly, then navigate to the Admin Registration logic
-      setTimeout(() => {
-        this.router.navigate(['/login']); // Redirect to login page after community creation
-      }, 3000); // 3-second delay to show success message
+      // Send the data to the backend
+      this.http.post('http://localhost:5000/api/community/register', communityData).subscribe(
+        (response) => {
+          this.successMessage = `Successfully created the community "${this.communityName}" with pickup on ${this.pickupDays.join(', ')} from ${this.pickupStartTime} to ${this.pickupEndTime}.`;
+
+          // Redirect to the login page after showing the success message
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 3000); // 3-second delay to show success message
+        },
+        (error) => {
+          console.error(error);
+          this.errorMessage = 'Failed to create the community. Please try again.';
+        }
+      );
+    } else {
+      this.errorMessage = 'Please fill out all required fields.';
     }
   }
 

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-user-registration',
@@ -18,20 +19,27 @@ export class UserRegistrationComponent {
 
   communities: string[] = ['Greenwood Apartments', 'Blue Hills', 'Sunrise Park']; // Example communities
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private http: HttpClient) {}
 
   // Register user and redirect to the login page
   registerUser() {
-    if (this.user.fullName && this.user.email) {
-      // Save user data to local storage
-      const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
-      storedUsers.push(this.user);
-      localStorage.setItem('users', JSON.stringify(storedUsers));
-
-      // Navigate to the login page after registration
-      this.router.navigate(['/login']);
-    }
-  }
+    const userData = {
+      fullName: this.user.fullName,
+      email: this.user.email,
+      phone: this.user.phone,
+      address: this.user.address,
+      communityId: this.user.community,
+    };
+  
+    this.http.post('http://localhost:5000/api/user/register', userData).subscribe(
+      (response) => {
+        this.router.navigate(['/login']);
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
+  }  
 
   goToLogin() {
     this.router.navigate(['/login']);

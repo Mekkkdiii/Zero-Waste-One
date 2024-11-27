@@ -6,7 +6,7 @@ import {
   _RecycleViewRepeaterStrategy,
   _VIEW_REPEATER_STRATEGY,
   isDataSource
-} from "./chunk-7B2CEVMP.js";
+} from "./chunk-5DND6NPL.js";
 import {
   BidiModule,
   Directionality,
@@ -4442,4 +4442,4 @@ export {
   Overlay,
   OverlayModule
 };
-//# sourceMappingURL=chunk-KGEJ44MK.js.map
+//# sourceMappingURL=chunk-YKLMFC6I.js.map
