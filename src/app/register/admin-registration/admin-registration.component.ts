@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component } from '@angular/core'; 
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-admin-registration',
@@ -8,30 +9,32 @@ import { Router } from '@angular/router';
 })
 export class AdminRegistrationComponent {
   admin = {
-    name: '',
+    fullName: '',  // Renamed from 'name' to 'fullName'
     email: '',
-    phone: '',
-    role: 'admin'
+    phone: ''
   };
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private http: HttpClient) {}
 
-  // Navigate to the Create Community component and pass the admin data via state
-  onNext() {
-    this.router.navigate(['/create-community'], {
-      state: { adminData: this.admin },
-    });
-  }
+  // Register the admin
+  registerAdmin() {
+    const adminData = {
+      fullName: this.admin.fullName,  // Renamed to 'fullName'
+      email: this.admin.email,
+      phone: this.admin.phone,
+    };
+  
+    this.http.post('http://localhost:5000/api/admin/register', adminData).subscribe(
+      (response) => {
+        this.router.navigate(['/create-community'], { state: { adminData: response } });
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
+  }  
 
-  // Handle submission logic after community creation
-  onCommunityCreated() {
-    // Store admin data in local storage
-    localStorage.setItem('users', JSON.stringify([this.admin]));
-    
-    // Redirect to the login page after community creation
-    this.router.navigate(['/login']);
-  }
-
+  // Navigate to the login page
   goToLogin() {
     this.router.navigate(['/login']);
   }
