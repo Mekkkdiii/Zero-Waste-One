@@ -129,37 +129,47 @@ app.post('/api/community/register', async (req, res) => {
 });
 
 // Route to get all communities with admin details
-app.get('/api/communities', (req, res) => {
-  Community.find()
-    .populate('createdBy')  // Populate the createdBy field with the full admin document
-    .exec((err, communities) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ message: 'Error fetching communities' });
-      }
-      res.status(200).json(communities);  // Send the populated communities as a JSON response
-    });
+app.get('/api/communities', async (req, res) => {
+  try {
+    // Fetch all communities and populate the createdBy field with admin details
+    const communities = await Community.find().populate('createdBy'); // Populate with the admin details
+
+    // Send the populated communities as a JSON response
+    res.status(200).json(communities);
+  } catch (error) {
+    console.error('Error fetching communities:', error);
+    res.status(500).json({ message: 'Error fetching communities' });
+  }
 });
 
-// User Registration
+// User Registration 
 app.post('/api/user/register', async (req, res) => {
   const { fullName, email, phone, address, communityId } = req.body;
-  const password = generatePassword();
-  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // Check if all required fields are provided
+  if (!fullName || !email || !phone || !address || !communityId) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  const password = generatePassword();  // Generate a password
+  const hashedPassword = await bcrypt.hash(password, 10);  // Hash the password
 
   try {
+    // Create a new user document
     const newUser = new User({
-      name: fullName,
+      fullName,  // Using fullName directly
       email,
       phone,
-      role: 'community-user',
+      role: 'community-user',  // Default role for community users
       password: hashedPassword,
-      community: communityId,
+      address,
+      community: communityId,  // Link to the specific community
     });
 
+    // Save the user to the database
     const savedUser = await newUser.save();
 
-    // Send password via email
+    // Send the password to the user via email
     const mailOptions = {
       from: 'magdalene1113@gmail.com',
       to: email,
@@ -167,18 +177,20 @@ app.post('/api/user/register', async (req, res) => {
       text: `Your user account has been created. Your password is: ${password}`,
     };
 
+    // Send the email and respond back to the user
     transporter.sendMail(mailOptions, (err, info) => {
       if (err) {
         console.error('Error sending email:', err);
         return res.status(500).json({ message: 'Error sending email' });
       }
-      res.status(201).json(savedUser);
+      res.status(201).json(savedUser);  // Send the saved user back as a response
     });
   } catch (error) {
-    console.error(error);
+    console.error('Error registering user:', error);
     res.status(500).json({ message: 'Error registering user' });
   }
 });
+
 
 // Login Route
 app.post('/api/login', async (req, res) => {
