@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
+const bodyParser = require('express');
 const User = require('./User');
 const Community = require('./Community');
 
@@ -10,6 +11,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.json());
 app.get('/', (req, res) => {
     res.send('Server is running!');
 });
@@ -89,26 +91,54 @@ app.post('/api/admin/register', async (req, res) => {
 
 // Community Registration
 app.post('/api/community/register', async (req, res) => {
-    const { name, address, pickupDays, pickupStartTime, pickupEndTime, adminId } = req.body;
-  
-    try {
-      const newCommunity = new Community({
-        name,
-        address,
-        days: pickupDays,
-        startTime: pickupStartTime,
-        endTime: pickupEndTime,
-        createdBy: adminId,
-      });
-  
-      const savedCommunity = await newCommunity.save();
-      res.status(201).json(savedCommunity);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Error creating community' });
+  const { name, address, pickupDays, pickupStartTime, pickupEndTime, createdBy } = req.body;
+
+  console.log('Received community registration data:', req.body);
+
+  // Check for missing fields
+  if (!name || !address || !pickupDays || !pickupStartTime || !pickupEndTime || !createdBy) {
+    console.log('Validation failed: Missing required fields');
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  try {
+    // Verify that the `createdBy` admin exists
+    const admin = await User.findById(createdBy);
+    if (!admin || admin.role !== 'admin') {
+      return res.status(404).json({ message: 'Admin not found or invalid role' });
     }
+
+    // Create the new community
+    const newCommunity = new Community({
+      name,
+      address,
+      days: pickupDays,
+      startTime: pickupStartTime,
+      endTime: pickupEndTime,
+      createdBy,
+    });
+
+    const savedCommunity = await newCommunity.save();
+    console.log('Community created and saved:', savedCommunity);
+    res.status(201).json(savedCommunity); // Return the saved community
+  } catch (error) {
+    console.error('Error creating community:', error);
+    res.status(500).json({ message: 'Error creating community' });
+  }
 });
-  
+
+// Route to get all communities with admin details
+app.get('/api/communities', (req, res) => {
+  Community.find()
+    .populate('createdBy')  // Populate the createdBy field with the full admin document
+    .exec((err, communities) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Error fetching communities' });
+      }
+      res.status(200).json(communities);  // Send the populated communities as a JSON response
+    });
+});
 
 // User Registration
 app.post('/api/user/register', async (req, res) => {
