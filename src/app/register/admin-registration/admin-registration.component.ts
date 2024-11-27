@@ -19,17 +19,28 @@ export class AdminRegistrationComponent {
   // Register the admin
   registerAdmin() {
     const adminData = {
-      fullName: this.admin.fullName,  // Renamed to 'fullName'
+      fullName: this.admin.fullName,  
       email: this.admin.email,
       phone: this.admin.phone,
     };
   
     this.http.post('http://localhost:5000/api/admin/register', adminData).subscribe(
-      (response) => {
-        this.router.navigate(['/create-community'], { state: { adminData: response } });
+      (response: any) => {
+        const adminId = response._id;  // Admin ID is returned from the registration API
+        
+        if (adminId) {
+          // Store adminId in localStorage
+          localStorage.setItem('adminId', adminId);
+          console.log('Admin ID stored in localStorage:', adminId);
+
+          // Redirect to the create-community page
+          this.router.navigate(['/create-community']);
+        } else {
+          console.error('Admin ID missing in the response.');
+        }
       },
       (error) => {
-        console.error(error);
+        console.error('Error during admin registration:', error);
       }
     );
   }  
