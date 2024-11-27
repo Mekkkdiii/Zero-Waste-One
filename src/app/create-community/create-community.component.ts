@@ -29,7 +29,6 @@ export class CreateCommunityComponent {
       this.pickupEndTime.trim().length > 0 // Check if end time is not empty
     );
   }
-  
 
   onSubmit() {
     this.successMessage = ''; // Clear previous messages
@@ -59,14 +58,21 @@ export class CreateCommunityComponent {
           )} from ${this.pickupStartTime} to ${this.pickupEndTime}.`;
           console.log('Community created:', response);
 
-          // Reset form and redirect
+          // Reset form
           this.communityName = '';
           this.communityAddress = '';
           this.pickupDays = [];
           this.pickupStartTime = '';
           this.pickupEndTime = '';
 
+          // Clear localStorage data to prevent data intersection
+          localStorage.clear(); // Clear all local storage items
+          
+          // Optionally, you could remove just the adminId instead of clearing everything
+          // localStorage.removeItem('adminId');
+
           setTimeout(() => {
+            // Redirect to login page after a short delay
             this.router.navigate(['/login']);
           }, 3000);
         },
