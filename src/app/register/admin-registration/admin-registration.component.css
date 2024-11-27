@@ -1,3 +1,21 @@
+.alert {
+  padding: 10px;
+  margin: 10px;
+  border-radius: 5px;
+  justify-items: center;
+  text-align: center;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: green;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #ab0d1d;
+}
+
 form {
     display: flex;
     flex-direction: column;

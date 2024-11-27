@@ -1,6 +1,12 @@
 <div class="login-container">
   <h1>ZeroWasteOne</h1>
   <h2>Admin Registration</h2>
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
   <form (ngSubmit)="registerAdmin()">
     <input
       type="text"

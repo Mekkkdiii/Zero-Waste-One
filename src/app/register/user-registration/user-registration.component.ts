@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core'; 
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
@@ -7,7 +7,7 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './user-registration.component.html',
   styleUrls: ['./user-registration.component.css']
 })
-export class UserRegistrationComponent {
+export class UserRegistrationComponent implements OnInit {
   user: any = {
     fullName: '',
     phone: '',
@@ -17,26 +17,51 @@ export class UserRegistrationComponent {
     role: 'community-user'
   };
 
-  communities: string[] = ['Greenwood Apartments', 'Blue Hills', 'Sunrise Park']; // Example communities
+  communities: any[] = []; // To hold community data
+
+  successMessage: string = '';  // For success message
+  errorMessage: string = '';    // For error message
 
   constructor(private router: Router, private http: HttpClient) {}
+
+  ngOnInit(): void {
+    this.loadCommunities(); // Fetch communities when the component is initialized
+  }
+
+  // Fetch communities from the backend
+  loadCommunities(): void {
+    this.http.get<any[]>('http://localhost:5000/api/communities').subscribe(
+      (response) => {
+        this.communities = response; // Populate communities with the fetched data
+      },
+      (error) => {
+        console.error('Error fetching communities:', error);
+      }
+    );
+  }
 
   // Register user and redirect to the login page
   registerUser() {
     const userData = {
-      fullName: this.user.fullName,
+      fullName: this.user.fullName, // Ensure fullName is passed
       email: this.user.email,
       phone: this.user.phone,
       address: this.user.address,
       communityId: this.user.community,
     };
-  
+
     this.http.post('http://localhost:5000/api/user/register', userData).subscribe(
       (response) => {
-        this.router.navigate(['/login']);
+        this.successMessage = 'Registration successful! Please check your email for login details.';
+        this.errorMessage = ''; // Clear any previous error messages
+        setTimeout(() => {
+          this.router.navigate(['/login']);
+        }, 2000); // Redirect after 2 seconds to allow user to see the success message
       },
       (error) => {
         console.error(error);
+        this.errorMessage = 'Error registering user. Please try again later.';
+        this.successMessage = ''; // Clear any previous success messages
       }
     );
   }  

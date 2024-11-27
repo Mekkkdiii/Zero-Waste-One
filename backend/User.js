@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
   address: { type: String }, // Optional for admin, but required for normal users
   role: { type: String, enum: ['admin', 'community-user'], required: true },
   password: { type: String, required: true },
-  community: { type: mongoose.Schema.Types.ObjectId, ref: 'Community' },  // Optional for admin, required for community-user
+  communityId: { type: mongoose.Schema.Types.ObjectId, ref: 'Community' },  // Optional for admin, required for community-user
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },  // Only for community-user, to reference the admin
 });
 

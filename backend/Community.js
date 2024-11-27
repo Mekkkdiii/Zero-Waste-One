@@ -9,4 +9,6 @@ const communitySchema = new mongoose.Schema({
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Reference to admin
 });
 
+const Community = mongoose.model('Community', communitySchema);
+
 module.exports = mongoose.model('Community', communitySchema);

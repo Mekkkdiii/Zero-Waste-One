@@ -11,6 +11,7 @@ export class LoginComponent implements OnInit {
   email: string = '';
   password: string = '';
   errorMessage: string = '';
+  successMessage: string = '';
   isLoading: boolean = false;
 
   // Replace with your actual backend URL
@@ -21,8 +22,9 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {}
 
   login() {
-    // Reset error message
+    // Reset messages
     this.errorMessage = '';
+    this.successMessage = '';
     this.isLoading = true; // Show loading spinner
 
     // Send login credentials to the backend
@@ -38,6 +40,9 @@ export class LoginComponent implements OnInit {
           // Store the user role in local storage
           localStorage.setItem('userRole', response.role);
 
+          // Success message
+          this.successMessage = 'Login successful! Redirecting...';
+
           // Navigate based on user role
           if (response.role === 'admin') {
             localStorage.setItem('isAdmin', 'true');
@@ -48,6 +53,7 @@ export class LoginComponent implements OnInit {
             localStorage.setItem('isCommunityUser', 'true');
             this.router.navigate(['/community-dashboard']);
           }
+
         } else {
           this.errorMessage = 'Login failed. Please try again.';
         }

@@ -2,6 +2,13 @@
   <h1>ZeroWasteOne</h1>
   <h2>Login</h2>
 
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
   <form (ngSubmit)="login()">
     <div class="form-group">
       <label for="email">Email:</label>
@@ -28,8 +35,6 @@
         aria-label="Password"
       />
     </div>
-
-    <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
 
     <button type="submit">Login</button>
 
