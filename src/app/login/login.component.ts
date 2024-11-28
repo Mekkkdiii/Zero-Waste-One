@@ -32,28 +32,31 @@ export class LoginComponent implements OnInit {
       (response: any) => {
         this.isLoading = false; // Hide loading spinner
 
-        // Check response for user role and token
-        if (response && response.token && response.role) {
-          // Store the token in local storage
-          localStorage.setItem('authToken', response.token);
+        // Check response for user data
+        if (response && response.user) {
+          const user = response.user; // Assuming the response contains a `user` object
 
-          // Store the user role in local storage
-          localStorage.setItem('userRole', response.role);
+          // Store the full user data in local storage
+          localStorage.setItem('userData', JSON.stringify(user));
 
           // Success message
           this.successMessage = 'Login successful! Redirecting...';
 
           // Navigate based on user role
-          if (response.role === 'admin') {
+          if (user.role === 'admin') {
             localStorage.setItem('isAdmin', 'true');
             localStorage.setItem('isCommunityUser', 'false');
+            
+            // Store admin data with the correct key
+            localStorage.setItem('registeredAdmin', JSON.stringify(user));
+            
             this.router.navigate(['/admin-dashboard']);
-          } else if (response.role === 'community-user') {
+          } else if (user.role === 'community-user') {
             localStorage.setItem('isAdmin', 'false');
             localStorage.setItem('isCommunityUser', 'true');
+            localStorage.setItem('userId', user._id);
             this.router.navigate(['/community-dashboard']);
-          }
-
+          }          
         } else {
           this.errorMessage = 'Login failed. Please try again.';
         }

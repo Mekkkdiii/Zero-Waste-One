@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 interface Notification {
   message: string;
@@ -9,13 +10,13 @@ interface Notification {
 @Component({
   selector: 'app-notification-list',
   templateUrl: './notification-list.component.html',
-  styleUrls: ['./notification-list.component.css']
+  styleUrls: ['./notification-list.component.css', '../nav/nav.component.css']
 })
 export class NotificationListComponent implements OnInit {
   notificationsEnabled: boolean = true; 
   notifications: Notification[] = []; // Array to store notifications
 
-  constructor() {}
+  constructor(private router: Router) {}
 
   ngOnInit() {
     this.loadNotifications(); // Load notifications when component initializes
@@ -47,6 +48,11 @@ export class NotificationListComponent implements OnInit {
 
   deleteNotification(notification: Notification) {
     this.notifications = this.notifications.filter(n => n !== notification);
+  }
+
+  logout() {
+    localStorage.clear(); // Clear session data
+    this.router.navigate(['/login']); // Redirect to login page
   }
 }
 
