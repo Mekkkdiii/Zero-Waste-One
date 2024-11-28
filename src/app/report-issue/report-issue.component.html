@@ -37,8 +37,6 @@
       <label for="comments">Additional Comments (Optional):</label>
       <textarea id="comments" [(ngModel)]="newIssue.comments" name="comments"></textarea>
 
-      <label for="photo">Upload Photo:</label>
-      <input type="file" id="photo" (change)="onPhotoUpload($event)" />
       <div class="submit-btn">
         <button type="submit">Submit Issue</button>
       </div>

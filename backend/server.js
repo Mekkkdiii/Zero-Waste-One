@@ -9,6 +9,7 @@ const router = express.Router();
 const User = require('./User');
 const Community = require('./Community');
 const Broadcast = require('./Broadcast');
+const Issue = require('./Issue');
 
 const app = express();
 
@@ -278,7 +279,6 @@ app.post('/api/broadcast', authenticateToken, async (req, res) => {
   }
 });
 
-
 // Endpoint to get community data by admin ID
 app.get('/api/community/:adminId', async (req, res) => {
   const { adminId } = req.params;
@@ -294,6 +294,29 @@ app.get('/api/community/:adminId', async (req, res) => {
   } catch (error) {
     console.error('Error fetching community:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Route to create a new issue
+app.post('/api/issues', (req, res) => {
+  const newIssue = new Issue(req.body);
+
+  newIssue.save()
+    .then(issue => {
+      res.status(201).json(issue);
+    })
+    .catch(err => {
+      res.status(400).send('Error saving issue: ' + err);
+    });
+});
+
+// Endpoint to get all issues
+app.get('/api/issues', async (req, res) => {
+  try {
+    const issues = await Issue.find(); // Fetch issues from MongoDB
+    res.status(200).json(issues); // Send issues as response
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching issues', error: error.message });
   }
 });
 

@@ -5,8 +5,7 @@ const issueSchema = new mongoose.Schema({
   location: { type: String, required: true },
   description: { type: String, required: true },
   comments: { type: String },
-  status: { type: String, default: 'NEW' },
-  photo: { type: String } // If you want to store the photo path
+  status: { type: String, default: 'NEW' }
 }, { timestamps: true });
 
 const Issue = mongoose.model('Issue', issueSchema);

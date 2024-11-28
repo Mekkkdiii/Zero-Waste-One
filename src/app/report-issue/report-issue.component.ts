@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http'; // Import HttpClient for making API requests
 
 @Component({
   selector: 'app-report-issue',
@@ -11,76 +12,49 @@ export class ReportIssueComponent implements OnInit {
     type: '',
     location: '',
     description: '',
-    comments: '',
-    photo: null
+    comments: ''
   };
   reportedIssues: any[] = [];
   newIssueFormVisible: boolean = false;
+  apiUrl = 'http://localhost:5001/api'; // Directly set API URL here
 
-  constructor(private router: Router) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
-    this.loadReportedIssues();
-    this.initializeStaticIssues(); // Initialize static issues
+    this.loadReportedIssues(); // Fetch issues from the API when the component loads
   }
 
   loadReportedIssues(): void {
-    const issuesData = JSON.parse(localStorage.getItem('reportedIssues') || '[]');
-    this.reportedIssues = issuesData;
-  }
-
-  initializeStaticIssues(): void {
-    const staticIssues = [
-      {
-        type: 'Missed Pickup',
-        location: '123 Elm St',
-        description: 'The waste was not collected on the scheduled day.',
-        comments: 'Please collect it as soon as possible.',
-        status: 'NEW'
+    // Fetch issues from the backend API
+    this.http.get<any[]>(`${this.apiUrl}/issues`).subscribe(
+      (response) => {
+        this.reportedIssues = response; // Store the fetched issues in reportedIssues array
       },
-      {
-        type: 'Overflowing Bin',
-        location: '456 Oak St',
-        description: 'The bin is overflowing and needs urgent attention.',
-        comments: 'It is causing a mess in the area.',
-        status: 'NEW'
-      },
-      {
-        type: 'Illegal Dumping',
-        location: '789 Pine St',
-        description: 'There are large bags of trash dumped illegally.',
-        comments: 'Needs to be cleaned up immediately.',
-        status: 'NEW'
+      (error) => {
+        console.error('Failed to load reported issues:', error);
       }
-    ];
-
-    // Check if local storage is empty and set static issues if true
-    if (!localStorage.getItem('reportedIssues')) {
-      localStorage.setItem('reportedIssues', JSON.stringify(staticIssues));
-    }
+    );
   }
 
-  // Method to submit a new issue
   submitIssue(): void {
     if (this.newIssue.type && this.newIssue.location && this.newIssue.description) {
-      this.reportedIssues.push({ ...this.newIssue, status: 'NEW' });
-      localStorage.setItem('reportedIssues', JSON.stringify(this.reportedIssues));
-      this.newIssueFormVisible = false; // Hide the form after submission
-      this.newIssue = { type: '', location: '', description: '', comments: '', photo: null }; // Reset the form
+      // Send the new issue to the backend API
+      this.http.post(`${this.apiUrl}/issues`, this.newIssue).subscribe(
+        (response) => {
+          // Add the newly created issue to the list of reported issues
+          this.reportedIssues.push(response);
+          this.newIssueFormVisible = false; // Hide the form after submission
+          this.newIssue = { type: '', location: '', description: '', comments: ''}; // Reset the form
+        },
+        (error) => {
+          console.error('Error submitting issue:', error);
+        }
+      );
     }
   }
 
-  // Method to toggle the visibility of the new issue form
   showNewIssueForm(): void {
     this.newIssueFormVisible = !this.newIssueFormVisible;
-  }
-
-  // Method to handle photo upload (optional)
-  onPhotoUpload(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    if (target.files) {
-      this.newIssue.photo = target.files[0];
-    }
   }
 
   logout() {
