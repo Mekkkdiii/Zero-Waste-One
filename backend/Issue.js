@@ -5,9 +5,10 @@ const issueSchema = new mongoose.Schema({
   location: { type: String, required: true },
   description: { type: String, required: true },
   comments: { type: String },
-  status: { type: String, default: 'NEW' }
-}, { timestamps: true });
+  reportedAt: { type: Date, default: Date.now },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  status: { type: String, default: 'NEW', enum: ['NEW', 'IN PROGRESS', 'RESOLVED'] }
+});
 
 const Issue = mongoose.model('Issue', issueSchema);
-
-module.exports = Issue;
+module.exports = mongoose.model('Issue', issueSchema);
