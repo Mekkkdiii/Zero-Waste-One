@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import Chart from 'chart.js/auto';
+import { Router } from '@angular/router';
 
 interface PickupRecord {
   date: Date;
@@ -9,7 +10,7 @@ interface PickupRecord {
 @Component({
   selector: 'app-pickup-history',
   templateUrl: './pickup-history.component.html',
-  styleUrls: ['./pickup-history.component.css']
+  styleUrls: ['./pickup-history.component.css', '../nav/nav.component.css']
 })
 export class PickupHistoryComponent implements OnInit {
   wasteTypes: string[] = ['Household Waste', 'Recyclable Waste', 'Hazardous Waste'];
@@ -20,6 +21,8 @@ export class PickupHistoryComponent implements OnInit {
   selectedWasteType: string = '';
   filtersApplied: boolean = false;
   private chart: Chart | null = null; 
+
+  constructor(private router: Router) {}
 
   ngOnInit() {
     this.loadPickupHistory();
@@ -130,5 +133,10 @@ export class PickupHistoryComponent implements OnInit {
         }
       });
     }
+  }
+
+  logout() {
+    localStorage.clear(); // Clear session data
+    this.router.navigate(['/login']); // Redirect to login page
   }
 }

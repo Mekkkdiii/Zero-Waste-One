@@ -5,14 +5,18 @@ const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const bodyParser = require('express');
 const jwt = require('jsonwebtoken');
+const router = express.Router();
 const User = require('./User');
 const Community = require('./Community');
+const Broadcast = require('./Broadcast');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
+app.use('/api/community', router);
+
 app.get('/', (req, res) => {
     res.send('Server is running!');
 });
@@ -42,6 +46,20 @@ const generatePassword = () => {
   return password;
 };
 
+// Middleware: Authenticate Token
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) return res.status(401).json({ message: 'Token is required' });
+
+  jwt.verify(token, 'wassup123', (err, user) => {
+      if (err) return res.status(403).json({ message: 'Invalid token' });
+      req.user = user; // Attach user data to request
+      next();
+  });
+};
+
 // API Endpoints
 
 // Admin Registration
@@ -51,9 +69,6 @@ app.post('/api/admin/register', async (req, res) => {
   
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-  
-    // Log the hashed password after it's initialized
-    console.log(hashedPassword);
   
     try {
       const newAdmin = new User({
@@ -221,15 +236,71 @@ app.post('/api/login', async (req, res) => {
       message: 'Login successful',
       token,
       role: user.role,
-    });
+      user: {
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        communityId: user.communityId, // Include only if relevant
+      },
+    });    
+    
   } catch (error) {
     console.error('Error during login:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
+// Broadcast Message Route
+app.post('/api/broadcast', authenticateToken, async (req, res) => {
+  const { message, notifType, sent_Time } = req.body;
+
+  if (!message || !notifType || !sent_Time) {
+      return res.status(400).json({ message: 'Message, notifType, and sent_Time are required' });
+  }
+
+  try {
+      if (req.user.role !== 'admin') {
+          return res.status(403).json({ message: 'Only admins can broadcast messages' });
+      }
+
+      const newBroadcast = new Broadcast({
+          message,
+          notifType,
+          sent_Time,
+          adminId: req.user.userId,
+      });
+
+      const savedBroadcast = await newBroadcast.save();
+      res.status(201).json({ message: 'Broadcast message sent successfully', data: savedBroadcast });
+  } catch (error) {
+      res.status(500).json({ message: 'Error broadcasting message' });
+  }
+});
+
+
+// Endpoint to get community data by admin ID
+app.get('/api/community/:adminId', async (req, res) => {
+  const { adminId } = req.params;
+
+  try {
+    const community = await Community.findOne({ createdBy: adminId }).exec();
+
+    if (!community) {
+      return res.status(404).json({ message: 'Community not found' });
+    }
+
+    res.status(200).json({ community });
+  } catch (error) {
+    console.error('Error fetching community:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+module.exports = router;
+
 // Start the Server
-const PORT = 5000;
+const PORT = 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

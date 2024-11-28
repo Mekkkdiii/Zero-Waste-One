@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-report-issue',
   templateUrl: './report-issue.component.html',
-  styleUrls: ['./report-issue.component.css']
+  styleUrls: ['./report-issue.component.css', '../nav/nav.component.css']
 })
 export class ReportIssueComponent implements OnInit {
   newIssue: any = {
@@ -15,6 +16,8 @@ export class ReportIssueComponent implements OnInit {
   };
   reportedIssues: any[] = [];
   newIssueFormVisible: boolean = false;
+
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
     this.loadReportedIssues();
@@ -78,5 +81,10 @@ export class ReportIssueComponent implements OnInit {
     if (target.files) {
       this.newIssue.photo = target.files[0];
     }
+  }
+
+  logout() {
+    localStorage.clear(); // Clear session data
+    this.router.navigate(['/login']); // Redirect to login page
   }
 }

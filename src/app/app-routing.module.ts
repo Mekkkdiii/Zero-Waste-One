@@ -8,14 +8,15 @@ import { CommunityDashboardComponent } from './community-dashboard/community-das
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { CreateCommunityComponent } from './create-community/create-community.component';
 import { BroadcastMessageComponent } from './broadcast-message/broadcast-message.component';
-import { GenerateReportComponent } from './generate-report/generate-report.component';
+import { GenerateReportAdminComponent } from './generate-report-admin/generate-report-admin.component';
+import { GenerateReportUserComponent } from './generate-report-user/generate-report-user.component';
 import { NotificationListComponent } from './notification-list/notification-list.component';
 import { PickupHistoryComponent } from './pickup-history/pickup-history.component';
 import { ReportIssueComponent } from './report-issue/report-issue.component';
 import { SchedulePickupComponent } from './schedule-pickup/schedule-pickup.component';
 import { ViewIssueComponent } from './view-issue/view-issue.component';
-import { ViewProfileComponent } from './view-profile/view-profile.component';
-import { NavComponent } from './nav/nav.component';
+import { ViewProfileAdminComponent } from './view-profile-admin/view-profile-admin.component';
+import { ViewProfileUserComponent } from './view-profile-user/view-profile-user.component';
 
 
 const routes: Routes = [
@@ -28,13 +29,15 @@ const routes: Routes = [
   { path: 'community-dashboard', component: CommunityDashboardComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'broadcast', component: BroadcastMessageComponent },
-  { path: 'generate-report', component: GenerateReportComponent },
+  { path: 'generate-report-admin', component: GenerateReportAdminComponent },
+  { path: 'generate-report-user', component: GenerateReportUserComponent },
   { path: 'notifications', component: NotificationListComponent },
   { path: 'pickup-history', component: PickupHistoryComponent },
   { path: 'report-issue', component: ReportIssueComponent },
   { path: 'schedule-pickup', component: SchedulePickupComponent },
   { path: 'view-issue', component: ViewIssueComponent },
-  { path: 'view-profile', component: ViewProfileComponent },
+  { path: 'view-profile-admin', component: ViewProfileAdminComponent },
+  { path: 'view-profile-user', component: ViewProfileUserComponent },
 ];
 
 @NgModule({

@@ -5,8 +5,8 @@ import { SchedulePickupComponent } from '../schedule-pickup/schedule-pickup.comp
 import { NotificationListComponent } from '../notification-list/notification-list.component';
 import { ReportIssueComponent } from '../report-issue/report-issue.component';
 import { PickupHistoryComponent } from '../pickup-history/pickup-history.component';
-import { GenerateReportComponent } from '../generate-report/generate-report.component';
-import { ViewProfileComponent } from '../view-profile/view-profile.component';
+import { GenerateReportUserComponent } from '../generate-report-user/generate-report-user.component';
+import { ViewProfileUserComponent } from '../view-profile-user/view-profile-user.component';
 
 const routes: Routes = [
     {
@@ -18,8 +18,8 @@ const routes: Routes = [
         { path: 'pickup-history', component: PickupHistoryComponent },
         { path: 'report-issue', component: ReportIssueComponent },
         { path: 'notifications', component: NotificationListComponent },
-        { path: 'generate-report', component: GenerateReportComponent },
-        { path: 'view-profile', component: ViewProfileComponent },
+        { path: 'generate-report-user', component: GenerateReportUserComponent },
+        { path: 'view-profile-user', component: ViewProfileUserComponent },
       ],
     },
 ];  

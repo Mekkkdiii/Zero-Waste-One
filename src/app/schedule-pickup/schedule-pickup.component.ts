@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-schedule-pickup',
   templateUrl: './schedule-pickup.component.html',
-  styleUrls: ['./schedule-pickup.component.css']
+  styleUrls: ['./schedule-pickup.component.css', '../nav/nav.component.css']
 })
 export class SchedulePickupComponent {
   availableDates: string[] = this.getAvailableDates();
@@ -16,6 +17,8 @@ export class SchedulePickupComponent {
   confirmationMessage: string = '';
 
   nextAvailableDate: string = '';
+
+  constructor(private router: Router) {}
 
   getAvailableDates(): string[] {
     const dates = [];
@@ -49,5 +52,10 @@ export class SchedulePickupComponent {
     }
 
     this.confirmationMessage = `Pickup scheduled on ${this.selectedDate} at ${this.selectedTime} for ${this.selectedWasteType}.`;
+  }
+
+  logout() {
+    localStorage.clear(); // Clear session data
+    this.router.navigate(['/login']); // Redirect to login page
   }
 }

@@ -18,11 +18,12 @@ import { NotificationListComponent } from './notification-list/notification-list
 import { BroadcastMessageComponent } from './broadcast-message/broadcast-message.component';
 import { PickupHistoryComponent } from './pickup-history/pickup-history.component';
 import { ReportIssueComponent } from './report-issue/report-issue.component';
-import { GenerateReportComponent } from './generate-report/generate-report.component';
+import { GenerateReportAdminComponent } from './generate-report-admin/generate-report-admin.component';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ViewProfileComponent } from './view-profile/view-profile.component';
+import { ViewProfileAdminComponent } from './view-profile-admin/view-profile-admin.component';
+import { ViewProfileUserComponent } from './view-profile-user/view-profile-user.component';
 import { NgChartsModule } from 'ng2-charts';
 import { AdminDashboardModule } from './admin-dashboard/admin-dashboard.module';
 import { CommunityDashboardModule } from './community-dashboard/community-dashboard.module';
@@ -33,10 +34,10 @@ import { UserRegistrationComponent } from './register/user-registration/user-reg
 import { ViewIssueComponent } from './view-issue/view-issue.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { LoginComponent } from './login/login.component';
-import { NavComponent } from './nav/nav.component';
 import { CreateCommunityComponent } from './create-community/create-community.component';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
 import { CommunityDashboardComponent } from './community-dashboard/community-dashboard.component';
+import { GenerateReportUserComponent } from './generate-report-user/generate-report-user.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' }, // Redirect to login page
@@ -50,15 +51,16 @@ const appRoutes: Routes = [
     BroadcastMessageComponent, 
     PickupHistoryComponent, 
     ReportIssueComponent, 
-    GenerateReportComponent,
-    ViewProfileComponent,
+    GenerateReportAdminComponent,
+    ViewProfileAdminComponent,
+    ViewProfileUserComponent,
     ViewIssueComponent,
     AdminRegistrationComponent,
     UserRegistrationComponent,
     ForgotPasswordComponent,
     LoginComponent,
-    NavComponent,
     CreateCommunityComponent,
+    GenerateReportUserComponent
   ],
   imports: [
     BrowserModule,

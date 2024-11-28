@@ -3,8 +3,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { AdminDashboardComponent } from './admin-dashboard.component';
 import { CreateCommunityComponent } from '../create-community/create-community.component';
 import { BroadcastMessageComponent } from '../broadcast-message/broadcast-message.component';
-import { GenerateReportComponent } from '../generate-report/generate-report.component';
-import { ViewProfileComponent } from '../view-profile/view-profile.component';
+import { GenerateReportAdminComponent } from '../generate-report-admin/generate-report-admin.component';
+import { ViewProfileAdminComponent } from '../view-profile-admin/view-profile-admin.component';
 import { ViewIssueComponent } from '../view-issue/view-issue.component';
 
 const routes: Routes = [
@@ -14,10 +14,10 @@ const routes: Routes = [
     children: [
         { path: 'create-community', component: CreateCommunityComponent },
         { path: 'broadcast', component: BroadcastMessageComponent },
-        { path: 'generate-report', component: GenerateReportComponent },
-        { path: 'view-profile', component: ViewProfileComponent },
+        { path: 'generate-report-admin', component: GenerateReportAdminComponent },
+        { path: 'view-profile-admin', component: ViewProfileAdminComponent },
         { path: 'view-issue', component: ViewIssueComponent},
-        { path: '', redirectTo: 'view-profile', pathMatch: 'full' }, // Default child route
+        { path: '', redirectTo: 'view-profile-admin', pathMatch: 'full' }, // Default child route
     ],
   },
 ];

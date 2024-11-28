@@ -27,7 +27,7 @@ export class AdminRegistrationComponent {
       phone: this.admin.phone,
     };
 
-    this.http.post('http://localhost:5000/api/admin/register', adminData).subscribe(
+    this.http.post('http://localhost:5001/api/admin/register', adminData).subscribe(
       (response: any) => {
         const adminId = response._id;  // Admin ID is returned from the registration API
 

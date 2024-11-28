@@ -1,3 +1,4 @@
+// app.component.ts
 import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 
@@ -8,6 +9,8 @@ import { Router, NavigationEnd } from '@angular/router';
 })
 export class AppComponent implements OnInit {
   isLoggedIn: boolean = false;
+  isAdmin: boolean = false;
+  isCommunityUser: boolean = false;
   currentUserRole: string | null = null;
   title: string = 'ZeroWasteOne';
 
@@ -26,7 +29,19 @@ export class AppComponent implements OnInit {
 
   checkLoginStatus() {
     const userRole = localStorage.getItem('userRole');
-    this.isLoggedIn = !!userRole; // Set isLoggedIn to true if userRole exists
-    this.currentUserRole = userRole; // Store current user role
+    this.isLoggedIn = !!userRole; // true if userRole exists
+    this.currentUserRole = userRole;
+
+    // Check if the role is admin or community user
+    if (userRole === 'admin') {
+      this.isAdmin = true;
+      this.isCommunityUser = false;
+    } else if (userRole === 'community') {
+      this.isCommunityUser = true;
+      this.isAdmin = false;
+    } else {
+      this.isAdmin = false;
+      this.isCommunityUser = false;
+    }
   }
 }
