@@ -16,7 +16,7 @@ export class AdminDashboardComponent implements OnInit {
   pickupEndTime: string = '';
   communityExists: boolean = false;
 
-  private apiUrl = 'http://localhost:5000/api/community'; // Replace with your actual API URL
+  private apiUrl = 'http://localhost:5001/api/community'; // Replace with your actual API URL
 
   constructor(private http: HttpClient, private router: Router) {}
 

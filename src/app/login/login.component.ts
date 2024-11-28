@@ -15,7 +15,7 @@ export class LoginComponent implements OnInit {
   isLoading: boolean = false;
 
   // Replace with your actual backend URL
-  private backendUrl = 'http://localhost:5000/api/login';
+  private backendUrl = 'http://localhost:5001/api/login';
 
   constructor(private router: Router, private http: HttpClient) {}
 
@@ -26,37 +26,39 @@ export class LoginComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
     this.isLoading = true; // Show loading spinner
-
+  
     // Send login credentials to the backend
     this.http.post(this.backendUrl, { email: this.email, password: this.password }).subscribe(
       (response: any) => {
         this.isLoading = false; // Hide loading spinner
-
-        // Check response for user data
-        if (response && response.user) {
+  
+        // Check response for user data and token
+        if (response && response.user && response.token) {
           const user = response.user; // Assuming the response contains a `user` object
-
-          // Store the full user data in local storage
+          const token = response.token; // Assuming the response contains a JWT token
+  
+          // Store the token and user data in local storage
+          localStorage.setItem('authToken', token);
           localStorage.setItem('userData', JSON.stringify(user));
-
+  
           // Success message
           this.successMessage = 'Login successful! Redirecting...';
-
+  
           // Navigate based on user role
           if (user.role === 'admin') {
             localStorage.setItem('isAdmin', 'true');
             localStorage.setItem('isCommunityUser', 'false');
-            
+  
             // Store admin data with the correct key
             localStorage.setItem('registeredAdmin', JSON.stringify(user));
-            
+  
             this.router.navigate(['/admin-dashboard']);
           } else if (user.role === 'community-user') {
             localStorage.setItem('isAdmin', 'false');
             localStorage.setItem('isCommunityUser', 'true');
             localStorage.setItem('userId', user._id);
             this.router.navigate(['/community-dashboard']);
-          }          
+          }
         } else {
           this.errorMessage = 'Login failed. Please try again.';
         }
@@ -67,7 +69,7 @@ export class LoginComponent implements OnInit {
         console.error('Login error:', error);
       }
     );
-  }
+  }  
 
   navigateToRegister(role: string) {
     if (role === 'admin') {

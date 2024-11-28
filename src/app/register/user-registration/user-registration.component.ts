@@ -50,7 +50,7 @@ export class UserRegistrationComponent implements OnInit {
       communityId: this.user.community,
     };
 
-    this.http.post('http://localhost:5000/api/user/register', userData).subscribe(
+    this.http.post('http://localhost:5001/api/user/register', userData).subscribe(
       (response) => {
         this.successMessage = 'Registration successful! Please check your email for login details.';
         this.errorMessage = ''; // Clear any previous error messages

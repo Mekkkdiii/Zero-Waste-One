@@ -50,7 +50,7 @@ export class CreateCommunityComponent {
       };
 
       this.isLoading = true; // Show loader
-      this.http.post('http://localhost:5000/api/community/register', communityData).subscribe(
+      this.http.post('http://localhost:5001/api/community/register', communityData).subscribe(
         (response: any) => {
           this.isLoading = false;
           this.successMessage = `Successfully created the community "${this.communityName}" with pickup on ${this.pickupDays.join(
