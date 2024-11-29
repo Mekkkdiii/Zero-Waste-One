@@ -35,12 +35,12 @@ export class BroadcastMessageComponent {
       return;
     }
 
-    // Prepare payload
+    // Prepare payload with formatted sent_Time
     const payload = {
       userId, // Include userId in the payload
       message: this.announcementMessage.trim(),
       notifType: 'announcement',
-      sent_Time: new Date().toISOString(), // Consistent date format
+      sent_Time: new Date().toLocaleTimeString(), // Use toLocaleTimeString for the same format
     };
 
     this.isLoading = true; // Show loading spinner
