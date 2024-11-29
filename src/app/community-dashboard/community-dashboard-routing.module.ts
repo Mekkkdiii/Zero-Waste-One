@@ -6,7 +6,6 @@ import { NotificationListComponent } from '../notification-list/notification-lis
 import { ReportIssueComponent } from '../report-issue/report-issue.component';
 import { PickupHistoryComponent } from '../pickup-history/pickup-history.component';
 import { GenerateReportUserComponent } from '../generate-report-user/generate-report-user.component';
-import { ViewProfileUserComponent } from '../view-profile-user/view-profile-user.component';
 
 const routes: Routes = [
     {
@@ -19,7 +18,6 @@ const routes: Routes = [
         { path: 'report-issue', component: ReportIssueComponent },
         { path: 'notifications', component: NotificationListComponent },
         { path: 'generate-report-user', component: GenerateReportUserComponent },
-        { path: 'view-profile-user', component: ViewProfileUserComponent },
       ],
     },
 ];  

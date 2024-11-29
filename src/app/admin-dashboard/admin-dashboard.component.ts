@@ -26,29 +26,28 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   loadAdminData(): void {
-    const adminData = JSON.parse(localStorage.getItem('registeredAdmin') || '{}');
+    const userId = localStorage.getItem('userId');
 
-    // Check if admin data contains required fields
-    if (!adminData || !adminData._id) {
-      console.error('Admin ID is missing in local storage.');
+    if (!userId) {
+      console.error('User ID is missing in local storage.');
+      this.router.navigate(['/login']); // Redirect to login page
       return;
     }
 
-    this.adminName = adminData.fullName || 'Admin';
+    this.adminName = 'Admin'; // Default name for display
   }
 
   loadCommunityData(): void {
-    const adminData = JSON.parse(localStorage.getItem('registeredAdmin') || '{}');
-  
-    if (!adminData || !adminData._id) {
-      console.error('Admin ID is missing in local storage.');
+    const userId = localStorage.getItem('userId');
+
+    if (!userId) {
+      console.error('User ID is missing in local storage.');
+      this.router.navigate(['/login']); // Redirect to login page
       return;
     }
-  
-    const adminId = adminData._id;
-  
+
     // Fetch community data from the server
-    this.http.get(`${this.apiUrl}/${adminId}`).subscribe(
+    this.http.get(`${this.apiUrl}/${userId}`).subscribe(
       (response: any) => {
         if (response && response.community) {
           const community = response.community;
@@ -68,7 +67,8 @@ export class AdminDashboardComponent implements OnInit {
         this.communityExists = false;
       }
     );
-  }  
+  }
+
   logout() {
     localStorage.clear(); // Clear session data
     this.router.navigate(['/login']); // Redirect to login page

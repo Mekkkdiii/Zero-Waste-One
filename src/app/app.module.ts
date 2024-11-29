@@ -22,8 +22,6 @@ import { GenerateReportAdminComponent } from './generate-report-admin/generate-r
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ViewProfileAdminComponent } from './view-profile-admin/view-profile-admin.component';
-import { ViewProfileUserComponent } from './view-profile-user/view-profile-user.component';
 import { NgChartsModule } from 'ng2-charts';
 import { AdminDashboardModule } from './admin-dashboard/admin-dashboard.module';
 import { CommunityDashboardModule } from './community-dashboard/community-dashboard.module';
@@ -31,7 +29,6 @@ import { AdminDashboardRoutingModule } from './admin-dashboard/admin-dashboard-r
 import { CommunityDashboardRoutingModule } from './community-dashboard/community-dashboard-routing.module';
 import { AdminRegistrationComponent } from './register/admin-registration/admin-registration.component';
 import { UserRegistrationComponent } from './register/user-registration/user-registration.component';
-import { ViewIssueComponent } from './view-issue/view-issue.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { LoginComponent } from './login/login.component';
 import { CreateCommunityComponent } from './create-community/create-community.component';
@@ -52,9 +49,6 @@ const appRoutes: Routes = [
     PickupHistoryComponent, 
     ReportIssueComponent, 
     GenerateReportAdminComponent,
-    ViewProfileAdminComponent,
-    ViewProfileUserComponent,
-    ViewIssueComponent,
     AdminRegistrationComponent,
     UserRegistrationComponent,
     ForgotPasswordComponent,

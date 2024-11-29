@@ -14,9 +14,6 @@ import { NotificationListComponent } from './notification-list/notification-list
 import { PickupHistoryComponent } from './pickup-history/pickup-history.component';
 import { ReportIssueComponent } from './report-issue/report-issue.component';
 import { SchedulePickupComponent } from './schedule-pickup/schedule-pickup.component';
-import { ViewIssueComponent } from './view-issue/view-issue.component';
-import { ViewProfileAdminComponent } from './view-profile-admin/view-profile-admin.component';
-import { ViewProfileUserComponent } from './view-profile-user/view-profile-user.component';
 
 
 const routes: Routes = [
@@ -35,9 +32,6 @@ const routes: Routes = [
   { path: 'pickup-history', component: PickupHistoryComponent },
   { path: 'report-issue', component: ReportIssueComponent },
   { path: 'schedule-pickup', component: SchedulePickupComponent },
-  { path: 'view-issue', component: ViewIssueComponent },
-  { path: 'view-profile-admin', component: ViewProfileAdminComponent },
-  { path: 'view-profile-user', component: ViewProfileUserComponent },
 ];
 
 @NgModule({

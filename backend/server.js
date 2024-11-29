@@ -291,17 +291,30 @@ app.post('/api/broadcast', async (req, res) => {
 });
  
  
-// Endpoint to get community data by admin ID
-app.get('/api/community/:adminId', async (req, res) => {
-  const { adminId } = req.params;
- 
+app.get('/api/community/:userId', async (req, res) => {
+  const { userId } = req.params;
+
   try {
-    const community = await Community.findOne({ createdBy: adminId }).exec();
- 
+    // Find the user by userId and ensure they are an admin
+    const user = await User.findById(userId);
+
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied. Only admins can fetch community data.' });
+    }
+
+    // Fetch community associated with this admin
+    const community = await Community.findOne({ createdBy: userId }).exec();
+
     if (!community) {
       return res.status(404).json({ message: 'Community not found' });
     }
- 
+
+    // Include the admin's name and email
+    const adminData = {
+      fullName: user.fullName,
+      email: user.email,
+    };
+
     res.status(200).json({ community });
   } catch (error) {
     console.error('Error fetching community:', error);
@@ -358,6 +371,50 @@ app.get('/api/issues', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+app.get('/api/issues', async (req, res) => {
+  const { userId } = req.query;
+
+  if (!userId) {
+    return res.status(400).json({ message: 'User ID is required' });
+  }
+
+  try {
+    const issues = await Issue.find({ userId });
+    res.status(200).json(issues);
+  } catch (error) {
+    console.error('Error fetching issues:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+app.patch('/api/issues/:issueId', async (req, res) => {
+  const { issueId } = req.params;
+  const { status, userId } = req.body;
+
+  if (!status || !userId) {
+    return res.status(400).json({ message: 'Status and user ID are required' });
+  }
+
+  try {
+    const issue = await Issue.findOneAndUpdate(
+      { _id: issueId, userId },
+      { status },
+      { new: true }
+    );
+
+    if (!issue) {
+      return res.status(404).json({ message: 'Issue not found or unauthorized' });
+    }
+
+    res.status(200).json({ message: 'Issue status updated', issue });
+  } catch (error) {
+    console.error('Error updating issue status:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
  
 app.get('/api/issues/issue-types', async (req, res) => {
   try {
