@@ -707,6 +707,62 @@ app.get('/api/pickups/:userId', async (req, res) => {
   }
 });
 
+// 1. Fetch Notifications for a Community
+app.get('/api/notifications/:communityId', async (req, res) => {
+  const { communityId } = req.params;
+
+  try {
+    const notifications = await Broadcast.find({ communityId }) // Ensure this is a valid ObjectId
+      .sort({ sent_Date: -1, sent_Time: -1 }) // Sort by date and time, newest first
+      .lean();
+
+    res.json(notifications);
+  } catch (err) {
+    console.error('Error fetching notifications:', err);
+    res.status(500).json({ message: 'Failed to fetch notifications.' });
+  }
+});
+
+// 2. Mark a Notification as Read
+app.patch('/api/notifications/:message', async (req, res) => {
+  const { message } = req.params;
+
+  try {
+    const notification = await Broadcast.findOneAndUpdate(
+      { message },
+      { $set: { read: true } },
+      { new: true }
+    );
+
+    if (!notification) {
+      return res.status(404).json({ message: 'Notification not found.' });
+    }
+
+    res.json({ message: 'Notification marked as read.', notification });
+  } catch (err) {
+    console.error('Error marking notification as read:', err);
+    res.status(500).json({ message: 'Failed to update notification.' });
+  }
+});
+
+// 3. Delete a Notification
+app.delete('/api/notifications/:message', async (req, res) => {
+  const { message } = req.params;
+
+  try {
+    const result = await Broadcast.findOneAndDelete({ message });
+
+    if (!result) {
+      return res.status(404).json({ message: 'Notification not found.' });
+    }
+
+    res.json({ message: 'Notification deleted successfully.' });
+  } catch (err) {
+    console.error('Error deleting notification:', err);
+    res.status(500).json({ message: 'Failed to delete notification.' });
+  }
+});
+
 module.exports = router;
  
 // Start the Server
