@@ -34,22 +34,23 @@ export class ReportIssueComponent implements OnInit {
   }
 
   loadReportedIssues(): void {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-
-    // Fetch previously reported issues for the current user
-    this.http.get<any[]>(this.apiUrl, { headers }).subscribe(
+    const userId = localStorage.getItem('userId');  // Retrieve userId from localStorage
+    if (!userId) {
+      console.error('No userId found in localStorage');
+      return;  // If no userId is found, exit the function
+    }
+  
+    // Send userId as a query parameter or in the body of the request
+    this.http.get<any[]>(`${this.apiUrl}?userId=${userId}`).subscribe(
       (response) => {
-        this.reportedIssues = response; // Populate reported issues
+        this.reportedIssues = response;  // Populate reported issues
       },
       (error) => {
         console.error('Failed to load reported issues:', error);
         this.errorMessage = 'Failed to load reported issues. Please try again.';
       }
     );
-  }
+  }    
 
   submitIssue(): void {
     const token = localStorage.getItem('token');

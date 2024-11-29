@@ -259,29 +259,34 @@ app.post('/api/login', async (req, res) => {
 });
  
 // Broadcast Message Route
-app.post('/api/broadcast', authenticateToken, async (req, res) => {
-  const { message, notifType, sent_Time } = req.body;
- 
-  if (!message || !notifType || !sent_Time) {
-      return res.status(400).json({ message: 'Message, notifType, and sent_Time are required' });
+app.post('/api/broadcast', async (req, res) => {
+  const { userId, message, notifType, sent_Time } = req.body;
+
+  if (!userId || !message || !notifType || !sent_Time) {
+    return res.status(400).json({ message: 'UserId, message, notifType, and sent_Time are required' });
   }
- 
+
   try {
-      if (req.user.role !== 'admin') {
-          return res.status(403).json({ message: 'Only admins can broadcast messages' });
-      }
- 
-      const newBroadcast = new Broadcast({
-          message,
-          notifType,
-          sent_Time,
-          adminId: req.user.userId,
-      });
- 
-      const savedBroadcast = await newBroadcast.save();
-      res.status(201).json({ message: 'Broadcast message sent successfully', data: savedBroadcast });
+    // Find the user by userId and check their role
+    const user = await User.findById(userId);
+
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ message: 'Only admins can broadcast messages' });
+    }
+
+    // Create and save the broadcast message
+    const newBroadcast = new Broadcast({
+      message,
+      notifType,
+      sent_Time,
+      adminId: userId, // Associate with admin's ID
+    });
+
+    const savedBroadcast = await newBroadcast.save();
+    res.status(201).json({ message: 'Broadcast message sent successfully', data: savedBroadcast });
   } catch (error) {
-      res.status(500).json({ message: 'Error broadcasting message' });
+    console.error('Error broadcasting message:', error);
+    res.status(500).json({ message: 'Error broadcasting message' });
   }
 });
  
@@ -332,21 +337,21 @@ app.post('/api/issues', async (req, res) => {
 });
 
 // GET /api/issues endpoint to fetch issues reported by the logged-in user
-app.get('/api/issues', authenticateToken, async (req, res) => {
+app.get('/api/issues', async (req, res) => {
   try {
-    const userId = req.user.userId; // userId decoded from the JWT token
-   
+    const userId = req.query.userId; // Retrieve userId from query parameters
+
     if (!userId) {
-      return res.status(400).json({ message: 'User not authenticated' });
+      return res.status(400).json({ message: 'User ID is required' });
     }
- 
+
     // Fetch issues reported by the logged-in user
     const issues = await Issue.find({ userId: userId });
- 
+
     if (!issues) {
       return res.status(404).json({ message: 'No issues found for this user' });
     }
- 
+
     res.status(200).json(issues); // Return issues as JSON response
   } catch (error) {
     console.error('Error fetching issues:', error);
@@ -405,9 +410,12 @@ app.get('/api/pickups/statistics', async (req, res) => {
   try {
     const { startDate, endDate, userId, userRole } = req.query;
 
-    // Convert the provided start and end dates to Date objects
+    // Convert the provided start and end dates to Date objects and log them
     const start = new Date(startDate);
     const end = new Date(endDate);
+
+    console.log('Start Date:', start);
+    console.log('End Date:', end);
 
     // Build the query to retrieve the pickups within the date range
     let query = {
@@ -422,35 +430,31 @@ app.get('/api/pickups/statistics', async (req, res) => {
     // Retrieve all pickups matching the query
     const pickups = await Pickup.find(query);
 
+    // Log the retrieved pickups for debugging
+    console.log('Retrieved Pickups:', pickups);
+
     // Initialize pickup statistics counters
     const pickupStats = {
       recyclable: 0,
       hazardous: 0,
-      household: 0,
-      completed: 0,
-      pending: 0,
-      new: 0
+      household: 0
     };
 
     // Iterate over the pickups and count based on pickupType and pickupStatus
     pickups.forEach(pickup => {
-      if (pickup.pickupType === 'Recyclable') {
+      console.log('Processing Pickup:', pickup); // Log each pickup being processed
+
+      if (pickup.pickupType === 'Recyclable Waste') {
         pickupStats.recyclable += 1;
-      } else if (pickup.pickupType === 'Hazardous') {
+      } else if (pickup.pickupType === 'Hazardous Waste') {
         pickupStats.hazardous += 1;
-      } else if (pickup.pickupType === 'Household') {
+      } else if (pickup.pickupType === 'Household Waste') {
         pickupStats.household += 1;
       }
-
-      // Count by status
-      if (pickup.pickupStatus === 'COMPLETED') {
-        pickupStats.completed += 1;
-      } else if (pickup.pickupStatus === 'PENDING') {
-        pickupStats.pending += 1;
-      } else if (pickup.pickupStatus === 'NEW') {
-        pickupStats.new += 1;
-      }
     });
+
+    // Log the statistics before sending the response
+    console.log('Pickup Stats:', pickupStats);
 
     // Send the response with the statistics
     res.json({
@@ -462,14 +466,17 @@ app.get('/api/pickups/statistics', async (req, res) => {
     res.status(500).json({ message: 'Error fetching pickup statistics', error });
   }
 });
- 
+
 app.get('/api/pickups/recycling-rates', async (req, res) => {
   try {
     const { startDate, endDate, userId, userRole } = req.query;
 
-    // Convert the provided start and end dates to Date objects
+    // Convert the provided start and end dates to Date objects and log them
     const start = new Date(startDate);
     const end = new Date(endDate);
+
+    console.log('Start Date:', start);
+    console.log('End Date:', end);
 
     // Build the query to retrieve pickups within the date range
     let query = {
@@ -484,6 +491,9 @@ app.get('/api/pickups/recycling-rates', async (req, res) => {
     // Retrieve all pickups matching the query
     const pickups = await Pickup.find(query);
 
+    // Log the retrieved pickups for debugging
+    console.log('Retrieved Pickups:', pickups);
+
     // Initialize counters for each pickup type
     const pickupCounts = {
       recyclable: 0,
@@ -493,11 +503,13 @@ app.get('/api/pickups/recycling-rates', async (req, res) => {
 
     // Count the pickups by type
     pickups.forEach(pickup => {
-      if (pickup.pickupType === 'Recyclable') {
+      console.log('Processing Pickup:', pickup); // Log each pickup being processed
+
+      if (pickup.pickupType === 'Recyclable Waste') {
         pickupCounts.recyclable += 1;
-      } else if (pickup.pickupType === 'Hazardous') {
+      } else if (pickup.pickupType === 'Hazardous Waste') {
         pickupCounts.hazardous += 1;
-      } else if (pickup.pickupType === 'Household') {
+      } else if (pickup.pickupType === 'Household Waste') {
         pickupCounts.household += 1;
       }
     });
@@ -505,12 +517,19 @@ app.get('/api/pickups/recycling-rates', async (req, res) => {
     // Calculate the total number of pickups
     const totalPickups = pickups.length;
 
+    // Log the counts and total pickups for debugging
+    console.log('Pickup Counts:', pickupCounts);
+    console.log('Total Pickups:', totalPickups);
+
     // Calculate the recycling rates
     const recyclingRates = {
       recyclable: totalPickups > 0 ? (pickupCounts.recyclable / totalPickups) * 100 : 0,
       hazardous: totalPickups > 0 ? (pickupCounts.hazardous / totalPickups) * 100 : 0,
       household: totalPickups > 0 ? (pickupCounts.household / totalPickups) * 100 : 0
     };
+
+    // Log the recycling rates before sending the response
+    console.log('Recycling Rates:', recyclingRates);
 
     // Send the response with the recycling rates
     res.json({
@@ -522,6 +541,7 @@ app.get('/api/pickups/recycling-rates', async (req, res) => {
     res.status(500).json({ message: 'Error calculating recycling rates', error });
   }
 });
+
 
 // Get community details
 app.get('/api/community', async (req, res) => {

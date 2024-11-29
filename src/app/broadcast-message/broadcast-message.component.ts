@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-broadcast-message',
@@ -22,19 +22,22 @@ export class BroadcastMessageComponent {
     this.confirmationMessage = '';
     this.errorMessage = '';
 
+    // Input validation
     if (!this.announcementMessage.trim() || this.announcementMessage.trim().length < 5) {
       this.errorMessage = 'Please enter a valid announcement message of at least 5 characters.';
       return;
     }
 
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      this.errorMessage = 'Authorization token is missing. Please log in again.';
+    // Retrieve userId from localStorage
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+      this.errorMessage = 'UserId is missing. Please log in again.';
       return;
     }
 
     // Prepare payload
     const payload = {
+      userId, // Include userId in the payload
       message: this.announcementMessage.trim(),
       notifType: 'announcement',
       sent_Time: new Date().toISOString(), // Consistent date format
@@ -42,16 +45,12 @@ export class BroadcastMessageComponent {
 
     this.isLoading = true; // Show loading spinner
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-    });
-
     // Make the HTTP POST request
-    this.http.post(this.backendUrl, payload, { headers }).subscribe(
+    this.http.post(this.backendUrl, payload).subscribe(
       (response: any) => {
         this.isLoading = false;
         this.confirmationMessage = `Announcement broadcasted successfully: "${this.announcementMessage}"`;
-        this.announcementMessage = '';
+        this.announcementMessage = ''; // Reset the form
         console.log('Broadcast message response:', response);
       },
       (error) => {
