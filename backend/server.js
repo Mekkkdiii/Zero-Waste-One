@@ -628,32 +628,49 @@ app.get('/api/pickups/recycling-rates', async (req, res) => {
   }
 });
 
-
 // Get community details
 app.get('/api/community', async (req, res) => {
   try {
-    // Retrieve communityId from request headers
+    // Retrieve communityId either from request headers (for admin) or from user data
+    const userId = req.headers['user-id']; // Get userId from the request headers (could be part of a session/token)
     const communityId = req.headers['community-id'];
+
     console.log('Received communityId from headers:', communityId);
 
-    // Validate if the provided communityId is a valid MongoDB ObjectId
+    // If no communityId provided, fetch it based on userId (for users)
+    if (!communityId && userId) {
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      console.log('User found:', user);
+      const communityIdFromUser = user.communityId;  // Assume user has a communityId field
+      if (!mongoose.Types.ObjectId.isValid(communityIdFromUser)) {
+        return res.status(400).json({ message: 'Invalid community ID format from user data' });
+      }
+      const community = await Community.findById(communityIdFromUser);
+      if (!community) {
+        return res.status(404).json({ message: 'Community not found for this user' });
+      }
+      return res.status(200).json(community);  // Return community details for user
+    }
+
+    // Validate if the provided communityId is valid for admin
     if (!mongoose.Types.ObjectId.isValid(communityId)) {
-      console.error('Invalid community ID format:', communityId);
       return res.status(400).json({ message: 'Invalid community ID format' });
     }
 
-    // Query the communities collection using the communityId
+    // For admin, fetch the community directly by communityId
     const community = await Community.findById(communityId);
     if (!community) {
-      console.warn('No community found for ID:', communityId);
-      return res.status(404).json({ message: 'Community not found' });
+      return res.status(404).json({ message: 'Community not found for admin' });
     }
 
     console.log('Community details retrieved:', community);
-    res.status(200).json(community); // Return the community details as JSON
+    return res.status(200).json(community);  // Return community details for admin
   } catch (error) {
     console.error('Error in /api/community:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({ message: 'Internal server error' });
   }
 });
 
@@ -762,6 +779,91 @@ app.delete('/api/notifications/:message', async (req, res) => {
     res.status(500).json({ message: 'Failed to delete notification.' });
   }
 });
+
+app.get('/api/user/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findById(userId).populate('communityId', 'name').lean();
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone,
+      communityName: user.communityId?.name || 'No community assigned'
+    });
+  } catch (err) {
+    console.error('Error fetching user data:', err);
+    res.status(500).json({ message: 'Failed to fetch user data' });
+  }
+});
+
+app.get('/api/pickups/stats', async (req, res) => {
+  const { userId, communityId } = req.query;
+
+  console.log('Received userId:', userId);
+  console.log('Received communityId:', communityId);
+  console.log('Is userId valid?', mongoose.Types.ObjectId.isValid(userId));
+  console.log('Is communityId valid?', mongoose.Types.ObjectId.isValid(communityId));
+
+  // Validate ObjectId format
+  if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(communityId)) {
+    return res.status(400).json({ message: 'Invalid userId or communityId format' });
+  }
+
+  // Validate ObjectId format
+  if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(communityId)) {
+    return res.status(400).json({ message: 'Invalid userId or communityId format' });
+  }
+
+  try {
+    // Count all pickups for the community
+    const totalPickups = await Pickup.countDocuments({ communityId });
+
+    // Count successful pickups for the community
+    const successfulPickups = await Pickup.countDocuments({
+      communityId,
+      pickupStatus: 'COMPLETED'
+    });
+
+    // Find the next scheduled pickup
+    const nextPickup = await Pickup.findOne({
+      communityId,
+      pickupStatus: 'NEW'
+    })
+      .sort({ pickupDate: 1, pickupTime: 1 })
+      .lean();
+
+    // Fetch the recent pickups for the user
+    const recentPickups = await Pickup.find({ userId })
+      .sort({ pickupDate: -1 })
+      .limit(5)
+      .lean();
+
+    res.json({
+      totalPickups,
+      successfulPickups,
+      nextPickup: nextPickup
+        ? {
+            pickupDate: nextPickup.pickupDate,
+            pickupTime: nextPickup.pickupTime
+          }
+        : null,
+      recentPickups: recentPickups.map((pickup) => ({
+        date: pickup.pickupDate,
+        status: pickup.pickupStatus
+      }))
+    });
+  } catch (err) {
+    console.error('Error fetching pickup stats:', err);
+    res.status(500).json({ message: 'Failed to fetch pickup stats' });
+  }
+});
+
 
 module.exports = router;
  
