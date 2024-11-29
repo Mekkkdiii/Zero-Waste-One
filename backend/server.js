@@ -864,6 +864,48 @@ app.get('/api/pickups/stats', async (req, res) => {
   }
 });
 
+// API to handle the forgot-password request
+app.post('/api/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    // Find the user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'Email not found. Please register or try again.' });
+    }
+
+    // Generate a new password
+    const newPassword = generatePassword();
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password in the database
+    user.password = hashedNewPassword;  // Assuming the password field is hashed
+    await user.save();
+
+    // Send the new password to the user via email
+    const mailOptions = {
+      from: 'magdalene1113@gmail.com',
+      to: email,
+      subject: 'Password Reset',
+      text: `Your new password is: ${newPassword}`
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+        return res.status(500).json({ message: 'Error sending email' });
+      }
+
+      console.log('Email sent:', info.response);
+      res.status(200).json({ message: 'Password reset successful. Please check your inbox.' });
+    });
+  } catch (error) {
+    console.error('Error in /api/forgot-password:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 module.exports = router;
  

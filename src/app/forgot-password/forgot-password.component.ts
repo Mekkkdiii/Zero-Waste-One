@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-forgot-password',
@@ -10,26 +11,27 @@ export class ForgotPasswordComponent {
   email: string = '';
   message: string = ''; 
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private http: HttpClient) {}
 
-  // Check if email exists in local storage and simulate reset link
   sendResetEmail() {
-    const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
-    const userExists = storedUsers.some(
-      (user: { email: string }) => user.email === this.email
-    );
-
     if (!this.email) {
       this.message = 'Please enter your email.';
-    } else if (userExists) {
-      this.message =
-        'Password reset link has been sent to your email. Please check your inbox.';
-    } else {
-      this.message = 'Email not found. Please register or try again.';
+      return;
     }
+
+    // Send the email to the backend for password reset
+    this.http.post('http://localhost:5001/api/forgot-password', { email: this.email })
+      .subscribe(
+        (response: any) => {
+          this.message = response.message;
+        },
+        (error) => {
+          console.error('Error during password reset:', error);
+          this.message = 'An error occurred. Please try again.';
+        }
+      );
   }
 
-  // Navigate back to the login page
   goToLogin() {
     this.router.navigate(['/login']);
   }
