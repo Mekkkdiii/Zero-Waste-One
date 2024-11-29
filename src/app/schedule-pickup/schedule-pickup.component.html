@@ -17,7 +17,9 @@
   
   <form (ngSubmit)="onSubmit()" #pickupForm="ngForm">
     <div class="form-group">
-      <label for="date">Preferred Day (Next available date: {{ nextAvailableDate }})</label>
+      <label for="date">
+        Preferred Day (Next available date: {{ nextAvailableDate }})
+      </label>      
       <select id="date" name="date" [(ngModel)]="selectedDate" required>
         <option *ngFor="let date of availableDates" [value]="date">{{ date | date: 'fullDate' }}</option>
       </select>

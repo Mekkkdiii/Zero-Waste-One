@@ -10,6 +10,7 @@ const User = require('./User');
 const Community = require('./Community');
 const Broadcast = require('./Broadcast');
 const Issue = require('./Issue');
+const Pickup = require('./Pickup');
  
 const app = express();
  
@@ -519,6 +520,84 @@ app.get('/api/pickups/recycling-rates', async (req, res) => {
   } catch (error) {
     console.error('Error calculating recycling rates:', error);
     res.status(500).json({ message: 'Error calculating recycling rates', error });
+  }
+});
+
+// Get community details
+app.get('/api/community', async (req, res) => {
+  try {
+    // Retrieve communityId from request headers
+    const communityId = req.headers['community-id'];
+    console.log('Received communityId from headers:', communityId);
+
+    // Validate if the provided communityId is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(communityId)) {
+      console.error('Invalid community ID format:', communityId);
+      return res.status(400).json({ message: 'Invalid community ID format' });
+    }
+
+    // Query the communities collection using the communityId
+    const community = await Community.findById(communityId);
+    if (!community) {
+      console.warn('No community found for ID:', communityId);
+      return res.status(404).json({ message: 'Community not found' });
+    }
+
+    console.log('Community details retrieved:', community);
+    res.status(200).json(community); // Return the community details as JSON
+  } catch (error) {
+    console.error('Error in /api/community:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+//Save pickup
+app.post('/api/pickup', async (req, res) => {
+  const { userId, communityId, pickupType, pickupDate, pickupTime } = req.body;
+  try {
+    const newPickup = new Pickup({
+      userId,
+      communityId,
+      pickupType,
+      pickupDate,
+      pickupTime,
+      pickupStatus: 'NEW',
+      createdBy: userId  // Admin ID
+    });
+    const savedPickup = await newPickup.save();
+    res.status(201).json(savedPickup);
+  } catch (error) {
+    res.status(500).json({ message: 'Error scheduling pickup', error: error.message });
+  }
+});
+
+app.get('/api/pickups/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    // Validate userId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid userId format' });
+    }
+
+    // Fetch pickup history for the given userId
+    const pickups = await Pickup.find({ userId })
+      .select('pickupDate pickupType') // Only select the necessary fields
+      .exec();
+
+    if (pickups.length === 0) {
+      return res.status(404).json({ message: 'No pickup history found for this user' });
+    }
+
+    const pickupHistory = pickups.map(pickup => ({
+      date: pickup.pickupDate,
+      type: pickup.pickupType
+    }));
+
+    res.status(200).json(pickupHistory);
+  } catch (error) {
+    console.error('Error fetching pickup history:', error);
+    res.status(500).json({ message: 'Error retrieving pickup history', error: error.message });
   }
 });
 

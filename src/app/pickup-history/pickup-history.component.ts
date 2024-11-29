@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import Chart from 'chart.js/auto';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 interface PickupRecord {
   date: Date;
@@ -22,34 +23,44 @@ export class PickupHistoryComponent implements OnInit {
   filtersApplied: boolean = false;
   private chart: Chart | null = null; 
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private http: HttpClient) {}
 
   ngOnInit() {
     this.loadPickupHistory();
   }
 
   loadPickupHistory() {
-    this.history = [
-      { date: new Date('2024-10-02'), type: 'Household Waste' },
-      { date: new Date('2024-10-04'), type: 'Recyclable Waste' },
-      { date: new Date('2024-10-09'), type: 'Household Waste' },
-      { date: new Date('2024-10-11'), type: 'Hazardous Waste' },
-      { date: new Date('2024-10-16'), type: 'Household Waste' },
-      { date: new Date('2024-10-18'), type: 'Recyclable Waste' },
-    ];
-    this.filteredHistory = [...this.history];
-    this.updateChart(); 
+    const userId = localStorage.getItem('userId');  // Retrieve userId from local storage
+    if (!userId) {
+      console.error('User ID not found in local storage');
+      return;
+    }
+
+    // Call the backend to get pickup history based on userId
+    this.http.get<{ date: string, type: string }[]>(`http://localhost:5001/api/pickups/${userId}`)
+      .subscribe(
+        (response) => {
+          this.history = response.map(record => ({
+            date: new Date(record.date),
+            type: record.type
+          }));
+          this.filteredHistory = [...this.history];
+          this.updateChart();
+        },
+        (error) => {
+          console.error('Error retrieving pickup history:', error);
+        }
+      );
   }
 
   applyFilters() {
     this.filtersApplied = true;
 
-    // Validate date range
     if (this.startDate && this.endDate && new Date(this.startDate) > new Date(this.endDate)) {
       alert('Start date must be before the end date.');
-      return; }
+      return;
+    }
 
-    // Apply filters to the pickup history
     this.filteredHistory = this.history.filter(record => {
       const recordDate = new Date(record.date);
       const start = this.startDate ? new Date(this.startDate) : null;
@@ -60,12 +71,11 @@ export class PickupHistoryComponent implements OnInit {
              (!this.selectedWasteType || record.type === this.selectedWasteType);
     });
 
-    // Check if no filters are actually applied
     if (!this.isFilterApplied()) {
-      this.filteredHistory = [...this.history]; // Reset if no filters applied
+      this.filteredHistory = [...this.history]; 
     }
 
-    this.updateChart(); // Update chart after applying filters
+    this.updateChart();
   }
 
   isFilterApplied(): boolean {
@@ -81,7 +91,7 @@ export class PickupHistoryComponent implements OnInit {
       return 0;
     });
 
-    this.updateChart(); 
+    this.updateChart();
   }
 
   updateChart() {
@@ -91,7 +101,6 @@ export class PickupHistoryComponent implements OnInit {
       return; 
     }
 
-    // Count waste types based on filtered history
     const wasteCount = this.filteredHistory.reduce((acc, record) => {
       acc[record.type] = (acc[record.type] || 0) + 1;
       return acc;
@@ -112,13 +121,11 @@ export class PickupHistoryComponent implements OnInit {
       }],
     };
 
-    // Clear existing chart before rendering a new one
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); 
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    // Create a new chart or update the existing one
     if (this.chart) {
-      this.chart.data = chartData; 
-      this.chart.update(); 
+      this.chart.data = chartData;
+      this.chart.update();
     } else {
       this.chart = new Chart(ctx, {
         type: 'bar',
@@ -136,7 +143,7 @@ export class PickupHistoryComponent implements OnInit {
   }
 
   logout() {
-    localStorage.clear(); // Clear session data
-    this.router.navigate(['/login']); // Redirect to login page
+    localStorage.clear();
+    this.router.navigate(['/login']);
   }
 }

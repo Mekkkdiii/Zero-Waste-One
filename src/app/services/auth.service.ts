@@ -15,6 +15,8 @@ export class AuthService {
     // Store userId in local storage
     const userId = userData._id;
     localStorage.setItem('userId', userId); // Store userId
+    const communityId = userData.communityId;
+    localStorage.setItem('communityId', communityId);
   }
   
 
