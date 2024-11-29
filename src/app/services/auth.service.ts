@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  constructor(private router: Router) {}
+  private apiUrl = 'http://localhost:5001/api';
+
+  constructor(private http: HttpClient, private router: Router) {}
 
   login(token: string, userData: any, role: string): void {
     localStorage.setItem('token', token); // Store JWT token
@@ -15,8 +18,20 @@ export class AuthService {
     // Store userId in local storage
     const userId = userData._id;
     localStorage.setItem('userId', userId); // Store userId
-    const communityId = userData.communityId;
-    localStorage.setItem('communityId', communityId);
+    if (role === 'admin') {
+      this.http.get(`${this.apiUrl}/community/by-admin/${userId}`).subscribe(
+        (response: any) => {
+          if (response && response.communityId) {
+            localStorage.setItem('communityId', response.communityId); // Store communityId in local storage
+          } else {
+            console.warn('No community found for this admin.');
+          }
+        },
+        (error) => {
+          console.error('Error fetching communityId:', error);
+        }
+      );
+    }
   }
   
 

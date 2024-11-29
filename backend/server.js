@@ -258,30 +258,37 @@ app.post('/api/login', async (req, res) => {
   }
 });
  
-// Broadcast Message Route
+/// Broadcast Message Route
 app.post('/api/broadcast', async (req, res) => {
-  const { userId, message, notifType, sent_Time } = req.body;
-
-  if (!userId || !message || !notifType || !sent_Time) {
-    return res.status(400).json({ message: 'UserId, message, notifType, and sent_Time are required' });
+  const { userId, message, notifType, sent_Time, communityId } = req.body; // Get communityId from body
+ 
+  // Check if all required fields are provided
+  if (!userId || !communityId || !message || !notifType || !sent_Time) {
+    return res.status(400).json({ message: 'UserId, communityId, message, notifType, and sent_Time are required' });
   }
-
+ 
   try {
-    // Find the user by userId and check their role
+    // Validate the userId (ensure it's an admin)
     const user = await User.findById(userId);
-
     if (!user || user.role !== 'admin') {
       return res.status(403).json({ message: 'Only admins can broadcast messages' });
     }
-
+ 
+    // Validate the communityId (check if the community exists)
+    const community = await Community.findById(communityId);
+    if (!community) {
+      return res.status(400).json({ message: 'Invalid communityId' });
+    }
+ 
     // Create and save the broadcast message
     const newBroadcast = new Broadcast({
       message,
       notifType,
       sent_Time,
-      adminId: userId, // Associate with admin's ID
+      userId, // Associate with admin's ID
+      communityId, // Add communityId to the broadcast
     });
-
+ 
     const savedBroadcast = await newBroadcast.save();
     res.status(201).json({ message: 'Broadcast message sent successfully', data: savedBroadcast });
   } catch (error) {
@@ -289,8 +296,30 @@ app.post('/api/broadcast', async (req, res) => {
     res.status(500).json({ message: 'Error broadcasting message' });
   }
 });
- 
- 
+
+app.get('/api/community/by-admin/:adminId', async (req, res) => {
+  const { adminId } = req.params;
+
+  // Validate adminId format
+  if (!mongoose.Types.ObjectId.isValid(adminId)) {
+    return res.status(400).json({ message: 'Invalid adminId format' });
+  }
+
+  try {
+    // Find the community created by the admin
+    const community = await Community.findOne({ createdBy: adminId }).select('_id').exec();
+
+    if (community) {
+      return res.status(200).json({ communityId: community._id });
+    } else {
+      return res.status(404).json({ message: 'Community not found for this admin.' });
+    }
+  } catch (error) {
+    console.error('Error fetching communityId:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 app.get('/api/community/:userId', async (req, res) => {
   const { userId } = req.params;
 
