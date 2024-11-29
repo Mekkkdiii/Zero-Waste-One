@@ -31,6 +31,9 @@ export class AuthService {
           console.error('Error fetching communityId:', error);
         }
       );
+    } else {
+      const communityId = userData.communityId;
+      localStorage.setItem('communityId', communityId);
     }
   }
   
