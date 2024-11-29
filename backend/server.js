@@ -674,10 +674,10 @@ app.get('/api/community', async (req, res) => {
   }
 });
 
-//Save pickup
 app.post('/api/pickup', async (req, res) => {
   const { userId, communityId, pickupType, pickupDate, pickupTime } = req.body;
   try {
+    // Create and save the pickup
     const newPickup = new Pickup({
       userId,
       communityId,
@@ -688,7 +688,12 @@ app.post('/api/pickup', async (req, res) => {
       createdBy: userId  // Admin ID
     });
     const savedPickup = await newPickup.save();
-    res.status(201).json(savedPickup);
+
+    // Return only relevant details in the response
+    res.status(201).json({
+      message: 'Pickup successfully scheduled.',
+      pickupId: savedPickup._id,
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error scheduling pickup', error: error.message });
   }
@@ -904,6 +909,55 @@ app.post('/api/forgot-password', async (req, res) => {
   } catch (error) {
     console.error('Error in /api/forgot-password:', error);
     res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Broadcast Pickup Reminder
+app.post('/api/broadcast-pickup', async (req, res) => {
+  const { userId, pickupId } = req.body;
+
+  try {
+    // Validate user and pickup
+    const user = await User.findById(userId);
+    const pickup = await Pickup.findById(pickupId);
+
+    if (!user || !pickup) {
+      return res.status(404).json({ message: 'User or Pickup not found.' });
+    }
+
+    // Create the broadcast message
+    const message = `Reminder: You have a ${pickup.pickupType} pickup scheduled on ${pickup.pickupDate} at ${pickup.pickupTime}.`;
+    const broadcast = new Broadcast({
+      message,
+      notifType: 'pickup',
+      sent_Time: new Date().toLocaleTimeString(),
+      userId: userId,
+      communityId: user.communityId, // Assuming the user has a communityId
+    });
+
+    // Save the broadcast
+    await broadcast.save();
+
+    // Optional: Send email notification
+    const mailOptions = {
+      from: 'your-email@gmail.com',
+      to: user.email,
+      subject: 'Pickup Reminder',
+      text: message,
+    };
+
+    transporter.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        console.error('Error sending email:', err);
+      } else {
+        console.log('Email sent:', info.response);
+      }
+    });
+
+    res.status(200).json({ message: 'Broadcast sent successfully.' });
+  } catch (error) {
+    console.error('Error in broadcast-pickup:', error);
+    res.status(500).json({ message: 'Internal server error.' });
   }
 });
 

@@ -6,39 +6,39 @@
     <li><a routerLink="/pickup-history">Pickup History</a></li>
     <li><a routerLink="/generate-report-user">Generate Report</a></li>
     <li><a routerLink="/report-issue">Report Issue</a></li>
+    <li><a routerLink="/notifications">Notifications</a></li>
     <li><a (click)="logout()">Logout</a></li>
   </ul>
 </nav>
 
 <div class="schedule-pickup">
-  <h2>Schedule Waste Pickup</h2>
-  
+  <h2>Schedule Waste Pickup</h2> 
   <form (ngSubmit)="onSubmit()" #pickupForm="ngForm">
     <div class="form-group">
-      <label for="date">
-        Preferred Day (Next available date: {{ nextAvailableDate }})
-      </label>      
+      <label for="date">Preferred Date:</label>      
       <select id="date" name="date" [(ngModel)]="selectedDate" required>
         <option *ngFor="let date of availableDates" [value]="date">{{ date | date: 'fullDate' }}</option>
       </select>
     </div>
 
     <div class="form-group">
-      <label for="time">Preferred Time</label>
+      <label for="time">Preferred Time:</label>
       <select id="time" name="time" [(ngModel)]="selectedTime" required>
         <option *ngFor="let time of availableTimes" [value]="time">{{ time }}</option>
       </select>
     </div>
 
     <div class="form-group">
-      <label for="wasteType">Type of Waste</label>
+      <label for="wasteType">Type of Waste:</label>
       <select id="wasteType" name="wasteType" [(ngModel)]="selectedWasteType" required>
         <option *ngFor="let waste of wasteTypes" [value]="waste">{{ waste }}</option>
       </select>
     </div>
 
     <button type="submit" [disabled]="!pickupForm.valid">Schedule Pickup</button>
-
-    <div *ngIf="confirmationMessage" class="confirmation">{{ confirmationMessage }}</div>
   </form>
+  <div *ngIf="successMessage" class="success-message" [innerHTML]="successMessage"></div>
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
 </div>
