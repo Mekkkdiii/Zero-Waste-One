@@ -18,6 +18,7 @@
     <div class="form-group">
       <label for="reportType">Select Report Type:</label>
       <select id="reportType" (change)="onReportChange($event)">
+        <option value="" disabled selected>Select Report Type</option> <!-- Default Option -->
         <option *ngFor="let option of reportOptions" [value]="option">{{ option }}</option>
       </select>
     </div>
