@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core'; 
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import * as mongoose from 'mongoose'; // Import mongoose for ObjectId validation
 
 @Component({
   selector: 'app-community-dashboard',
@@ -8,52 +10,45 @@ import { Router } from '@angular/router';
 })
 export class CommunityDashboardComponent implements OnInit {
   userName: string = '';
+  email: string = '';
   communityName: string = '';
-  totalPickups: number = 0;
-  successfulPickups: number = 0;
-  missedPickups: number = 0;
+  communityAddress: string = '';
+  pickupDays: string[] = [];
+  pickupStartTime: string = '';
+  pickupEndTime: string = '';
+  communityExists: boolean = false;
 
-  nextPickup = {
-    day: '',
-    startTime: '',
-    endTime: ''
-  };
+  private apiUrl = 'http://localhost:5001/api/community'; // The endpoint for fetching community details
 
-  recentPickups = [
-    { date: '2024-10-18', status: 'Completed' },
-    { date: '2024-10-16', status: 'Completed' },
-    { date: '2024-10-11', status: 'Missed' }
-  ];
+  constructor(private router: Router, private http: HttpClient) {}
 
-  constructor(private router: Router) {}
-
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadUserData();
-    this.loadPickupStats();
   }
 
+  // Fetch user data using userId
   loadUserData(): void {
-    // Retrieve user data from session storage
-    const userData = JSON.parse(sessionStorage.getItem('registeredUser') || '{}');
+    const userId = localStorage.getItem('userId');
 
-    // Check if userData is available before accessing its properties
-    if (userData) {
-      this.userName = userData.fullName || 'Guest';
-      this.communityName = userData.community || 'Greenwood Apartments';
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      console.error('Invalid userId in local storage.');
+      this.router.navigate(['/login']); // Redirect to login if invalid userId
+      return;
     }
+
+    this.http.get<any>(`http://localhost:5001/api/user/${userId}`).subscribe(
+      (data) => {
+        this.userName = data.fullName || 'Guest';
+        this.email = data.email;
+      },
+      (error) => {
+        console.error('Failed to load user data:', error);
+        alert('Could not fetch user data. Please try again later.');
+      }
+    );
   }
 
-  loadPickupStats(): void {
-    // Simulated pickup statistics; replace with actual data retrieval logic if needed
-    this.totalPickups = 50;  // Example total pickups
-    this.successfulPickups = 45; // Example successful pickups
-    this.missedPickups = this.totalPickups - this.successfulPickups; // Calculating missed pickups
-
-    // Example next pickup details; replace with actual data if needed
-    this.nextPickup.day = 'Wednesday';
-    this.nextPickup.startTime = '08:00 AM';
-    this.nextPickup.endTime = '10:00 AM';
-  }
+  // Logout function to clear local storage and redirect to login
   logout() {
     localStorage.clear(); // Clear session data
     this.router.navigate(['/login']); // Redirect to login page

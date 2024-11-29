@@ -13,30 +13,8 @@
 
 <div class="dashboard-container">
   <h2>Community Dashboard</h2>
-  <div class="community-info">
-    <h3>Your Community</h3>
-    <p>{{ communityName }}</p>
-  </div>
-
-  <div class="pickup-stats">
-    <h3>Pickup Statistics</h3>
-    <p>Total Pickups: {{ totalPickups }}</p>
-    <p>Successful Pickups: {{ successfulPickups }}</p>
-    <p>Missed Pickups: {{ missedPickups }}</p>
-  </div>
-
-  <div class="next-pickup">
-    <h3>Next Pickup</h3>
-    <p>Day: {{ nextPickup.day }}</p>
-    <p>Time: {{ nextPickup.startTime }} - {{ nextPickup.endTime }}</p>
-  </div>
-
-  <div class="recent-pickups">
-    <h3>Recent Pickups</h3>
-    <ul>
-      <li *ngFor="let pickup of recentPickups">
-        Date: {{ pickup.date }}, Status: {{ pickup.status }}
-      </li>
-    </ul>
+  <div class="community-info-card">
+    <h3><strong>User Name:</strong> {{ userName }}</h3>
+    <h3><strong>User Email:</strong> {{ email }}</h3>
   </div>
 </div>
