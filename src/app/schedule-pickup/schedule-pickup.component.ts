@@ -70,6 +70,14 @@ export class SchedulePickupComponent implements OnInit {
     };
   
     console.log('Payload for pickup scheduling:', payload);
+
+    // Format the date using toLocaleDateString
+    const formattedDate = new Date(this.selectedDate).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
   
     this.http.post('http://localhost:5001/api/pickup', payload).subscribe(
       (response: any) => {
@@ -88,14 +96,6 @@ export class SchedulePickupComponent implements OnInit {
             alert('Pickup scheduled, but reminder notification failed.');
           }
         );
-  
-        // Format the date using toLocaleDateString
-        const formattedDate = new Date(this.selectedDate).toLocaleDateString('en-US', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        });
   
         // Set success message
         this.successMessage = `

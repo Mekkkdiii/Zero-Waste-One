@@ -925,8 +925,17 @@ app.post('/api/broadcast-pickup', async (req, res) => {
       return res.status(404).json({ message: 'User or Pickup not found.' });
     }
 
+    // Format the pickupDate
+    const formattedDate = new Date(pickup.pickupDate).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
     // Create the broadcast message
-    const message = `Reminder: You have a ${pickup.pickupType} pickup scheduled on ${pickup.pickupDate} at ${pickup.pickupTime}.`;
+    const message = `Reminder: You have a ${pickup.pickupType} pickup scheduled on ${formattedDate} at ${pickup.pickupTime}.`;
+
     const broadcast = new Broadcast({
       message,
       notifType: 'pickup',
