@@ -68,10 +68,10 @@ const authenticateToken = (req, res, next) => {
 app.post('/api/admin/register', async (req, res) => {
     const { fullName, email, phone } = req.body;
     const password = generatePassword();
-  
+ 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-  
+ 
     try {
       const newAdmin = new User({
         fullName,
@@ -80,9 +80,9 @@ app.post('/api/admin/register', async (req, res) => {
         role: 'admin',
         password: hashedPassword,
       });
-  
+ 
       const savedAdmin = await newAdmin.save();
-  
+ 
       // Send password via email
       const mailOptions = {
         from: 'magdalene1113@gmail.com',
@@ -90,7 +90,7 @@ app.post('/api/admin/register', async (req, res) => {
         subject: 'Your Admin Account Details',
         text: `Your admin account has been created. Your password is: ${password}`,
       };
-  
+ 
       transporter.sendMail(mailOptions, (err, info) => {
         if (err) {
           console.error('Error sending email:', err);
@@ -185,7 +185,7 @@ app.post('/api/user/register', async (req, res) => {
       password: hashedPassword,
       address,
       communityId: communityId,
-
+ 
     });
  
     // Save the user to the database
@@ -250,7 +250,7 @@ app.post('/api/login', async (req, res) => {
         communityId: user.communityId, // Include only if relevant
       },
     });    
-    
+   
   } catch (error) {
     console.error('Error during login:', error);
     res.status(500).json({ message: 'Server error' });
@@ -302,16 +302,16 @@ app.get('/api/community/:adminId', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
+ 
 // POST endpoint to report a new issue
 app.post('/api/issues', async (req, res) => {
   const { type, location, description, comments, userId } = req.body;
-
+ 
   // Ensure userId and required fields are provided
   if (!userId || !type || !location || !description) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
-
+ 
   try {
     const newIssue = new Issue({
       type,
@@ -321,7 +321,7 @@ app.post('/api/issues', async (req, res) => {
       userId,  // Make sure userId is included in the saved issue
       reportedAt: new Date()
     });
-
+ 
     const savedIssue = await newIssue.save();
     res.status(201).json(savedIssue);  // Send back the saved issue
   } catch (error) {
@@ -329,7 +329,199 @@ app.post('/api/issues', async (req, res) => {
     res.status(500).json({ message: 'Error saving issue', error: error.message });
   }
 });
+
+// GET /api/issues endpoint to fetch issues reported by the logged-in user
+app.get('/api/issues', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId; // userId decoded from the JWT token
+   
+    if (!userId) {
+      return res.status(400).json({ message: 'User not authenticated' });
+    }
  
+    // Fetch issues reported by the logged-in user
+    const issues = await Issue.find({ userId: userId });
+ 
+    if (!issues) {
+      return res.status(404).json({ message: 'No issues found for this user' });
+    }
+ 
+    res.status(200).json(issues); // Return issues as JSON response
+  } catch (error) {
+    console.error('Error fetching issues:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+ 
+app.get('/api/issues/issue-types', async (req, res) => {
+  try {
+    const { startDate, endDate, userId, userRole } = req.query;
+
+    // Validate required fields
+    if (!startDate || !endDate || !userRole) {
+      return res.status(400).json({ message: 'Invalid query parameters' });
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Build query object
+    let query = { reportedAt: { $gte: start, $lte: end } };
+
+    if (userRole !== 'admin') {
+      if (!userId || userId === 'null') {
+        return res.status(400).json({ message: 'User ID is required for non-admin users' });
+      }
+
+      // Ensure userId is a valid ObjectId
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ message: 'Invalid User ID' });
+      }
+
+      query.userId = new mongoose.Types.ObjectId(userId);
+    }
+
+    // Fetch issues from database
+    const issues = await Issue.find(query);
+
+    if (!issues.length) {
+      return res.status(404).json({ message: 'No issues found for the given date range' });
+    }
+
+    const issueCounts = issues.reduce((counts, issue) => {
+      counts[issue.type] = (counts[issue.type] || 0) + 1;
+      return counts;
+    }, {});
+
+    res.json({ issueCounts, message: 'Issue counts retrieved successfully' });
+  } catch (error) {
+    console.error('Error retrieving issue types:', error);
+    res.status(500).json({ message: 'Error retrieving issue types', error });
+  }
+});
+
+app.get('/api/pickups/statistics', async (req, res) => {
+  try {
+    const { startDate, endDate, userId, userRole } = req.query;
+
+    // Convert the provided start and end dates to Date objects
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Build the query to retrieve the pickups within the date range
+    let query = {
+      pickupDate: { $gte: start, $lte: end }
+    };
+
+    // If the user is not an admin, filter by userId
+    if (userRole !== 'admin') {
+      query.userId = userId;
+    }
+
+    // Retrieve all pickups matching the query
+    const pickups = await Pickup.find(query);
+
+    // Initialize pickup statistics counters
+    const pickupStats = {
+      recyclable: 0,
+      hazardous: 0,
+      household: 0,
+      completed: 0,
+      pending: 0,
+      new: 0
+    };
+
+    // Iterate over the pickups and count based on pickupType and pickupStatus
+    pickups.forEach(pickup => {
+      if (pickup.pickupType === 'Recyclable') {
+        pickupStats.recyclable += 1;
+      } else if (pickup.pickupType === 'Hazardous') {
+        pickupStats.hazardous += 1;
+      } else if (pickup.pickupType === 'Household') {
+        pickupStats.household += 1;
+      }
+
+      // Count by status
+      if (pickup.pickupStatus === 'COMPLETED') {
+        pickupStats.completed += 1;
+      } else if (pickup.pickupStatus === 'PENDING') {
+        pickupStats.pending += 1;
+      } else if (pickup.pickupStatus === 'NEW') {
+        pickupStats.new += 1;
+      }
+    });
+
+    // Send the response with the statistics
+    res.json({
+      pickupStats,
+      message: 'Pickup statistics retrieved successfully'
+    });
+  } catch (error) {
+    console.error('Error fetching pickup statistics:', error);
+    res.status(500).json({ message: 'Error fetching pickup statistics', error });
+  }
+});
+ 
+app.get('/api/pickups/recycling-rates', async (req, res) => {
+  try {
+    const { startDate, endDate, userId, userRole } = req.query;
+
+    // Convert the provided start and end dates to Date objects
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Build the query to retrieve pickups within the date range
+    let query = {
+      pickupDate: { $gte: start, $lte: end }
+    };
+
+    // If the user is not an admin, filter by userId
+    if (userRole !== 'admin') {
+      query.userId = userId;
+    }
+
+    // Retrieve all pickups matching the query
+    const pickups = await Pickup.find(query);
+
+    // Initialize counters for each pickup type
+    const pickupCounts = {
+      recyclable: 0,
+      hazardous: 0,
+      household: 0,
+    };
+
+    // Count the pickups by type
+    pickups.forEach(pickup => {
+      if (pickup.pickupType === 'Recyclable') {
+        pickupCounts.recyclable += 1;
+      } else if (pickup.pickupType === 'Hazardous') {
+        pickupCounts.hazardous += 1;
+      } else if (pickup.pickupType === 'Household') {
+        pickupCounts.household += 1;
+      }
+    });
+
+    // Calculate the total number of pickups
+    const totalPickups = pickups.length;
+
+    // Calculate the recycling rates
+    const recyclingRates = {
+      recyclable: totalPickups > 0 ? (pickupCounts.recyclable / totalPickups) * 100 : 0,
+      hazardous: totalPickups > 0 ? (pickupCounts.hazardous / totalPickups) * 100 : 0,
+      household: totalPickups > 0 ? (pickupCounts.household / totalPickups) * 100 : 0
+    };
+
+    // Send the response with the recycling rates
+    res.json({
+      recyclingRates,
+      message: 'Recycling rates calculated successfully'
+    });
+  } catch (error) {
+    console.error('Error calculating recycling rates:', error);
+    res.status(500).json({ message: 'Error calculating recycling rates', error });
+  }
+});
+
 module.exports = router;
  
 // Start the Server

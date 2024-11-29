@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../services/auth.service';  // Import AuthService
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,11 @@ export class LoginComponent implements OnInit {
   // Replace with your actual backend URL
   private backendUrl = 'http://localhost:5001/api/login';
 
-  constructor(private router: Router, private http: HttpClient) {}
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private authService: AuthService  // Inject AuthService
+  ) {}
 
   ngOnInit(): void {}
 
@@ -37,26 +42,16 @@ export class LoginComponent implements OnInit {
           const user = response.user; // Assuming the response contains a `user` object
           const token = response.token; // Assuming the response contains a JWT token
   
-          // Store the token and user data in local storage
-          localStorage.setItem('authToken', token);
-          localStorage.setItem('userData', JSON.stringify(user));
+          // Use AuthService to store the token, user data, and role
+          this.authService.login(token, user, user.role); // Call AuthService login method
   
           // Success message
           this.successMessage = 'Login successful! Redirecting...';
   
           // Navigate based on user role
           if (user.role === 'admin') {
-            localStorage.setItem('isAdmin', 'true');
-            localStorage.setItem('isCommunityUser', 'false');
-  
-            // Store admin data with the correct key
-            localStorage.setItem('registeredAdmin', JSON.stringify(user));
-  
             this.router.navigate(['/admin-dashboard']);
           } else if (user.role === 'community-user') {
-            localStorage.setItem('isAdmin', 'false');
-            localStorage.setItem('isCommunityUser', 'true');
-            localStorage.setItem('userId', user._id);
             this.router.navigate(['/community-dashboard']);
           }
         } else {
@@ -69,7 +64,7 @@ export class LoginComponent implements OnInit {
         console.error('Login error:', error);
       }
     );
-  }  
+  }    
 
   navigateToRegister(role: string) {
     if (role === 'admin') {

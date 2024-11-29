@@ -24,7 +24,7 @@ export class ReportIssueComponent implements OnInit {
   constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
     if (!token) {
       // If token is missing, redirect to login page
       this.router.navigate(['/login']);
@@ -34,7 +34,7 @@ export class ReportIssueComponent implements OnInit {
   }
 
   loadReportedIssues(): void {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
     if (!token) return;
 
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
@@ -52,16 +52,13 @@ export class ReportIssueComponent implements OnInit {
   }
 
   submitIssue(): void {
-    const token = localStorage.getItem('authToken'); // Assuming the token is stored in local storage
+    const token = localStorage.getItem('token');
     if (!token) {
       this.errorMessage = 'Authorization token is missing. Please log in again.';
       return;
     }
   
-    // Extract userId from the token (assuming JWT contains userId)
-    const userId = this.getUserIdFromToken(token);
-  
-    // Ensure that the userId is present
+    const userId = localStorage.getItem('userId');
     if (!userId) {
       this.errorMessage = 'User ID is missing. Please log in again.';
       return;
@@ -75,18 +72,18 @@ export class ReportIssueComponent implements OnInit {
   
     const payload = {
       ...this.newIssue,
-      userId,  // Add userId to the payload
-      reportedAt: new Date().toISOString() // Add a timestamp for consistency
+      userId,  // Send userId in the body
+      reportedAt: new Date().toISOString()
     };
   
     // Send the issue to the backend
-    this.http.post(this.apiUrl, payload, { headers }).subscribe(
+    this.http.post('http://localhost:5001/api/issues', payload, { headers }).subscribe(
       (response: any) => {
         this.isLoading = false;
         this.successMessage = 'Issue reported successfully.';
-        this.reportedIssues.push(response); // Add the new issue to the list
-        this.newIssueFormVisible = false; // Hide the form
-        this.newIssue = { type: '', location: '', description: '', comments: '' }; // Reset the form
+        this.reportedIssues.push(response);
+        this.newIssueFormVisible = false;
+        this.newIssue = { type: '', location: '', description: '', comments: '' };
       },
       (error) => {
         this.isLoading = false;
@@ -94,18 +91,7 @@ export class ReportIssueComponent implements OnInit {
         this.errorMessage = error.error?.message || 'Failed to report issue. Please try again.';
       }
     );
-  }
-  
-  // Helper function to extract userId from token (assuming JWT contains userId)
-  getUserIdFromToken(token: string): string {
-    try {
-      const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decoding the token to extract userId
-      return decodedToken.userId; // Assuming userId is stored in the token
-    } catch (e) {
-      console.error('Error decoding token:', e);
-      return '';
-    }
-  }  
+  }   
 
   showNewIssueForm(): void {
     this.newIssueFormVisible = !this.newIssueFormVisible;

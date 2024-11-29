@@ -1,134 +1,182 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
-import { Router } from '@angular/router';
- 
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { AuthService } from '../services/auth.service';
+import { Router, ActivatedRoute } from '@angular/router';
+import { map } from 'rxjs/operators';
+
+
 Chart.register(...registerables);
- 
+
 @Component({
   selector: 'app-generate-report-admin',
   templateUrl: './generate-report-admin.component.html',
-  styleUrls: ['./generate-report.component.css', '../nav/nav.component.css'],
+  styleUrls: ['./generate-report.component.css', '../nav/nav.component.css']
 })
 export class GenerateReportAdminComponent {
-  reportType = '';
+  selectedReport: string = '';
   startDate: string = '';
   endDate: string = '';
+  reportMessage: string = '';
   chart: any;
-  isReportGenerated = false; // Flag to control table and chart visibility
- 
-  wasteData = [
-    { type: 'Recyclable Waste', amount: 40, date: '2024-10-01' },
-    { type: 'Household Waste', amount: 35, date: '2024-10-05' },
-    { type: 'Hazardous Waste', amount: 25, date: '2024-10-10' },
-  ];
- 
-  issuesData = [
-    { issue: 'Missed Pickup', count: 5, date: '2024-10-02' },
-    { issue: 'Overflowing Bin', count: 8, date: '2024-10-08' },
-    { issue: 'Illegal Dumping', count: 2, date: '2024-10-12' },
-  ];
- 
-  recyclingRates = [
-    { week: 'Week 1', rate: 20, date: '2024-10-01' },
-    { week: 'Week 2', rate: 30, date: '2024-10-07' },
-    { week: 'Week 3', rate: 25, date: '2024-10-14' },
-    { week: 'Week 4', rate: 35, date: '2024-10-21' },
-    { week: 'Week 5', rate: 40, date: '2024-10-24' },
+  userId: string = '';
+  userRole: string | null = null;
+
+  reportOptions: string[] = [
+    'Pickup Statistics',
+    'Issues Reported',
+    'Recycling Rates'
   ];
 
-  constructor(private router: Router) {}
- 
-  generateReport() {
-    if (!this.reportType || !this.startDate || !this.endDate) {
-      alert('Please select a report type and date range.');
+  @ViewChild('reportChart') reportChart!: ElementRef;
+
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
+
+  ngOnInit(): void {
+    this.userRole = this.authService.getRole();
+    const userId = this.route.snapshot.paramMap.get('id');
+    if (userId) {
+      this.userId = userId;
+    }
+
+    // Ensure the user role is admin
+    if (this.userRole !== 'admin') {
+      this.router.navigate(['/access-denied']);
+    }
+  }
+
+  onReportChange(event: Event): void {
+    const inputElement = event.target as HTMLSelectElement;
+    this.selectedReport = inputElement.value;
+    console.log('Selected Report:', this.selectedReport);
+  }
+
+  generateReport(): void {
+    if (!this.startDate || !this.endDate) {
+      alert('Please specify both start and end dates.');
       return;
     }
- 
-    if (this.chart) this.chart.destroy(); // Destroy previous chart
- 
-    const data = this.filterAndSortData();
-    const chartType = this.getChartType();
- 
-    this.chart = new Chart('reportChart', {
-      type: chartType,
+  
+    if (!this.selectedReport) {
+      alert('Please select a report type.');
+      return;
+    }
+  
+    const start = new Date(this.startDate);
+    const end = new Date(this.endDate);
+  
+    this.reportMessage = `Generating ${this.selectedReport} report from ${this.startDate} to ${this.endDate}.`;
+  
+    this.getReportData(this.selectedReport, start, end).subscribe(data => {
+      console.log('Received Data:', data); // Debug: Log the received data
+  
+      // Check if the data object is structured correctly
+      if (!data || !data.labels || !data.values || data.values.length === 0) {
+        alert('Insufficient data for the selected date range.');
+        return;
+      }
+  
+      if (this.chart) {
+        this.chart.destroy();
+      }
+  
+      const chartLabel = this.getChartLabel(this.selectedReport);
+  
+      this.createChart(data.labels, data.values, chartLabel);
+    }, error => {
+      console.error('Error fetching report data:', error);  // Log errors
+    });
+  }
+  
+
+  private getReportData(reportType: string, startDate: Date, endDate: Date): Observable<{ labels: string[], values: number[] }> {
+    const params = {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      userId: this.userId,
+      userRole: this.userRole
+    };
+
+    if (reportType === 'Pickup Statistics') {
+      return this.fetchPickupStatistics(params);
+    } else if (reportType === 'Issues Reported') {
+      return this.fetchIssuesReported(params);
+    } else if (reportType === 'Recycling Rates') {
+      return this.fetchRecyclingRates(params);
+    }
+    return new Observable(observer => observer.next({ labels: [], values: [] }));
+  }
+
+  private fetchPickupStatistics(params: any): Observable<{ labels: string[], values: number[] }> {
+    return this.http.get<{ labels: string[], values: number[] }>(
+      'http://localhost:5001/api/pickups/statistics', { params }
+    );
+  }
+
+  private fetchIssuesReported(params: any): Observable<{ labels: string[], values: number[] }> {
+    return this.http.get<{ issueCounts: { [key: string]: number }, message: string }>(
+      'http://localhost:5001/api/issues/issue-types', { params }
+    ).pipe(
+      map(response => {
+        // Map issueCounts to labels and values
+        const labels = Object.keys(response.issueCounts);  // e.g., ["Missed Pickup", "Illegal Dumping", ...]
+        const values = Object.values(response.issueCounts); // e.g., [12, 3, 5, 2]
+        return { labels, values };
+      })
+    );
+  }
+  
+
+  private fetchRecyclingRates(params: any): Observable<{ labels: string[], values: number[] }> {
+    return this.http.get<{ labels: string[], values: number[] }>(
+      'http://localhost:5001/api/pickups/recycling-rates', { params }
+    );
+  }
+
+  private getChartLabel(reportType: string): string {
+    if (reportType === 'Pickup Statistics') {
+      return 'Waste Type';
+    } else if (reportType === 'Issues Reported') {
+      return 'Report Type';
+    } else if (reportType === 'Recycling Rates') {
+      return 'Recyclable Type';
+    }
+    return '';
+  }
+
+  private createChart(labels: string[], values: number[], chartLabel: string): void {
+    const integerValues = values.map(value => Math.floor(value));
+
+    const ctx = this.reportChart.nativeElement.getContext('2d');
+    this.chart = new Chart(ctx, {
+      type: 'bar',
       data: {
-        labels: data.map((item) => item.type || item.issue || item.week),
-        datasets: [
-          {
-            label: this.getChartLabel(),
-            data: data.map((item) => item.amount || item.count || item.rate),
-            backgroundColor: this.getBackgroundColors(),
-            borderColor: '#2196F3',
-            fill: false,
-            tension: 0.4,
-          },
-        ],
+        labels: labels,
+        datasets: [{
+          label: chartLabel,
+          data: integerValues,
+          backgroundColor: ['#4CAF50', '#8BC34A', '#388E3C'],
+        }]
       },
       options: {
         responsive: true,
-        plugins: {
-          legend: { display: true },
-          tooltip: { enabled: true },
-        },
-      },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1
+            }
+          }
+        }
+      }
     });
- 
-    this.isReportGenerated = true; // Set flag to true only when report is generated
   }
- 
-  filterAndSortData() {
-    let data = [];
-    switch (this.reportType) {
-      case 'pickup':
-        data = this.wasteData;
-        break;
-      case 'issues':
-        data = this.issuesData;
-        break;
-      case 'recycling':
-        data = this.recyclingRates;
-        break;
-    }
- 
-    return data
-      .filter(
-        (item) =>
-          new Date(item.date) >= new Date(this.startDate) &&
-          new Date(item.date) <= new Date(this.endDate)
-      )
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }
- 
-  getChartType() {
-    switch (this.reportType) {
-      case 'pickup':
-        return 'pie';
-      case 'issues':
-        return 'bar';
-      case 'recycling':
-        return 'line';
-      default:
-        return 'bar';
-    }
-  }
- 
-  getChartLabel() {
-    switch (this.reportType) {
-      case 'pickup':
-        return 'Waste Collected (by Type)';
-      case 'issues':
-        return 'Reported Issues';
-      case 'recycling':
-        return 'Recycling Rates (%)';
-      default:
-        return '';
-    }
-  }
- 
-  getBackgroundColors() {
-    return ['#4CAF50', '#FF9800', '#F44336'];
-  }
-
   logout() {
     localStorage.clear(); // Clear session data
     this.router.navigate(['/login']); // Redirect to login page

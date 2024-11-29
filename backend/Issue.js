@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const issueSchema = new mongoose.Schema({
-  type: { type: String, required: true },
+  type: { type: String, required: true }, //eg.Missed Pickup, Illegal Dumping, Overflowing Bin, Others
   location: { type: String, required: true },
   description: { type: String, required: true },
   comments: { type: String },
